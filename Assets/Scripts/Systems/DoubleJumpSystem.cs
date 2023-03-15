@@ -5,12 +5,14 @@ using UnityEngine;
 public class DoubleJumpSystem : MonoBehaviour
 {
     public CharacterController player;
+    
     private void OnEnable()
     {
-        player.jumpCount = 2;
+        //change the jump chance for player
+        player.jumpChances = 2;
     }
     private void OnDisable()
     {
-        player.jumpCount = 1;
+        player.jumpChances = 1;
     }
 }

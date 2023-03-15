@@ -5,9 +5,7 @@ using UnityEngine;
 public class PhysicsAttackSystem : MonoBehaviour
 {
     public GameObject player;
-
     private Animator playerAnim;
-    private Collider2D playerWeaponCollider;
     private void OnEnable()
     {
         Instantiate();
@@ -38,6 +36,5 @@ public class PhysicsAttackSystem : MonoBehaviour
     private void Instantiate()
     {
         playerAnim = player.GetComponent<Animator>();
-        playerWeaponCollider = player.GetComponentInChildren<WeaponComponent>().GetComponent<Collider2D>();
     }
 }
