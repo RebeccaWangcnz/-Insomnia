@@ -18,7 +18,9 @@ public class CharacterController : MonoBehaviour
     public float rayLength;
     public float rayDistance;
     public float jumpSpeed;
+    public float jumpSpeed_2;
     public float jumpSpeedUp;
+    public float jumpSpeedUp_2;
     public float jumpSpeedDown;
 
     //private parameters
@@ -40,6 +42,8 @@ public class CharacterController : MonoBehaviour
     //jump
     [HideInInspector]
     public int jumpCount = 1;
+    private int currentJumpCount;
+    private bool isJump;
     #endregion
 
     #region Execute
@@ -48,6 +52,8 @@ public class CharacterController : MonoBehaviour
         rigid = GetComponent<Rigidbody2D>();
         //attack is allowed in the begining
         allowAttackInput = true;
+        //set jump count
+        jumpCount = 1;
     }
     // Update is called once per frame
     void Update()
@@ -74,8 +80,7 @@ public class CharacterController : MonoBehaviour
         else
             rigid.velocity = new Vector2(0, rigid.velocity.y);
         //jump execute
-        if (jumpPressed&&isGrounded)
-            Jump();
+        Jump();
         //execute attack
         if(attackPressed&&allowAttackInput)
         {
@@ -97,7 +102,12 @@ public class CharacterController : MonoBehaviour
             allowAttackInput = false;
         }
         //adjust up and down jump feel
-        if(rigid.velocity.y>0)
+        //this is the speed for double jump
+        if(rigid.velocity.y > 0&&jumpCount==2&&currentJumpCount==0)
+        {
+            rigid.velocity -= new Vector2(0, jumpSpeedUp_2 * Time.deltaTime);
+        }
+        else if(rigid.velocity.y>0)
         {
             rigid.velocity -=new Vector2(0, jumpSpeedUp * Time.deltaTime) ;
         }
@@ -111,8 +121,33 @@ public class CharacterController : MonoBehaviour
     #region Function
     private void Jump()
     {
-        rigid.velocity = new Vector2(rigid.velocity.x, jumpSpeed * Time.deltaTime);
-        jumpPressed = false;
+        //Debug.Log(currentJumpCount);
+        //Debug.Log(jumpCount);
+        //set current jump count
+        if(isGrounded&&isJump)
+        {
+            currentJumpCount=jumpCount;
+            isJump = false;
+            //forbid jump input available when you in the air
+            jumpPressed = false;
+        }
+        else if(!isGrounded&&!isJump)
+        {
+            currentJumpCount = jumpCount - 1;
+        }
+        //first jump
+        if (jumpPressed && currentJumpCount>0)
+        {
+            //speed for double jump
+            if(jumpCount == 2 && currentJumpCount == 1)
+                rigid.velocity = new Vector2(rigid.velocity.x, jumpSpeed_2 * Time.deltaTime);
+            //speed for first jump
+            else
+                rigid.velocity = new Vector2(rigid.velocity.x, jumpSpeed * Time.deltaTime);
+            currentJumpCount--;
+            isJump = true;
+            jumpPressed = false;
+        }
     }
     private bool IsGrounded()
     {
