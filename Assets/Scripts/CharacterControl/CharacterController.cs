@@ -8,6 +8,7 @@ public class CharacterController : MonoBehaviour
     //input
     public string xInput;
     public string jumpInput;
+    public string attackInput;
     //walk
     public float walkSpeed;
     public float stopDeadzone;
@@ -26,11 +27,21 @@ public class CharacterController : MonoBehaviour
     private float rigidVelocityx;
     //bool for input
     private bool jumpPressed;
+    private bool attackPressed;
     //Ground check
     private bool isGrounded;
+    //attack
+    private int totalAttackTimes = 2;
+    private int currentAttackTimes;
+    [HideInInspector]
+    public bool allowAttackInput;
+    [HideInInspector]
+    public bool canTriggerCombo;
     private void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
+        //attack is allowed in the begining
+        allowAttackInput = true;
     }
     // Update is called once per frame
     void Update()
@@ -40,6 +51,9 @@ public class CharacterController : MonoBehaviour
         //get jump input
         if (Input.GetButtonDown(jumpInput))
             jumpPressed = true;
+        //get attack input
+        if (Input.GetButtonDown(attackInput))
+            attackPressed = true;
         //change the face
         if(rigidVelocityx!=0)
             transform.localScale =new Vector3( Mathf.Sign(rigidVelocityx), 1, 1);
@@ -56,6 +70,26 @@ public class CharacterController : MonoBehaviour
         //jump execute
         if (jumpPressed&&isGrounded)
             Jump();
+        //execute attack
+        if(attackPressed&&allowAttackInput)
+        {
+            //set attack combo
+            if(canTriggerCombo)
+            {
+                currentAttackTimes=(++currentAttackTimes)% totalAttackTimes;
+            }
+            else
+            {
+                currentAttackTimes = 0;
+            }
+            Debug.Log(currentAttackTimes);
+            //attack
+            Evently.Instance.Publish(new NormalAttackEvent(currentAttackTimes));
+            //reset attackPressed
+            attackPressed = false;
+            //disabled attack input
+            allowAttackInput = false;
+        }
         //adjust up and down jump feel
         if(rigid.velocity.y>0)
         {
@@ -67,6 +101,7 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    //************************************************************************FUNCTION**************************************************************************************************
     private void Jump()
     {
         rigid.velocity = new Vector2(rigid.velocity.x, jumpSpeed * Time.deltaTime);
