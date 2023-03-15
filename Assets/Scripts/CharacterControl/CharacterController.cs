@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
+    #region Parameters
     [Header("BasicMove")]
     //input
     public string xInput;
@@ -19,7 +20,6 @@ public class CharacterController : MonoBehaviour
     public float jumpSpeed;
     public float jumpSpeedUp;
     public float jumpSpeedDown;
-    public int jumpCount;
 
     //private parameters
     //rigidbody
@@ -37,6 +37,12 @@ public class CharacterController : MonoBehaviour
     public bool allowAttackInput;
     [HideInInspector]
     public bool canTriggerCombo;
+    //jump
+    [HideInInspector]
+    public int jumpCount = 1;
+    #endregion
+
+    #region Execute
     private void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
@@ -82,7 +88,7 @@ public class CharacterController : MonoBehaviour
             {
                 currentAttackTimes = 0;
             }
-            Debug.Log(currentAttackTimes);
+            //Debug.Log(currentAttackTimes);
             //attack
             Evently.Instance.Publish(new NormalAttackEvent(currentAttackTimes));
             //reset attackPressed
@@ -100,8 +106,9 @@ public class CharacterController : MonoBehaviour
             rigid.velocity -= new Vector2(0, jumpSpeedDown * Time.deltaTime);
         }
     }
+    #endregion
 
-    //************************************************************************FUNCTION**************************************************************************************************
+    #region Function
     private void Jump()
     {
         rigid.velocity = new Vector2(rigid.velocity.x, jumpSpeed * Time.deltaTime);
@@ -121,4 +128,5 @@ public class CharacterController : MonoBehaviour
         return false;
 
     }
+    #endregion
 }
