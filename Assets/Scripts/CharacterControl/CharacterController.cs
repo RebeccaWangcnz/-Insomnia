@@ -5,6 +5,11 @@ using UnityEngine;
 public class CharacterController : MonoBehaviour
 {
     #region Parameters
+    [Header("Params for Test")]
+    public HookComponent hook_test;
+    [Header("Player Info")]
+    //*********************************player state*************
+    public PlayerState playerState;
     [Header("BasicMove")]
     //********************input********************
     [Tooltip("the input for move horizontally")]
@@ -13,6 +18,8 @@ public class CharacterController : MonoBehaviour
     public string jumpInput;
     [Tooltip("the input for attacking")]
     public string attackInput;
+    [Tooltip("the input for finding hook")]
+    public string hookModeInput;
     //*********************walk**********************
     [Tooltip("the speed for walking")]
     public float walkSpeed;
@@ -43,7 +50,8 @@ public class CharacterController : MonoBehaviour
     //private parameters
     //*******************************rigidbody********************
     //player's rigidbody
-    private Rigidbody2D rigid;
+    [HideInInspector]
+    public Rigidbody2D rigid;
     //the x velocity for player's rigid
     private float rigidVelocityx;
     //*****************************bool for input***********************
@@ -77,6 +85,9 @@ public class CharacterController : MonoBehaviour
     private bool isAir;
     //player hold the jump button to get higher
     private bool holdJump;
+    //***********************hook***********************************
+    [HideInInspector]
+    public bool hookPressed;
     #endregion
 
     #region Execute
@@ -88,28 +99,38 @@ public class CharacterController : MonoBehaviour
         allowAttackInput = true;
         //set jump count
         jumpChances = 1;
+        //set player state
+        playerState = PlayerState.Normal;
     }
     // Update is called once per frame
     void Update()
     {
-        //get horizontal speed
-        rigidVelocityx = Input.GetAxis(xInput) * walkSpeed;
-        //get jump input
-        if (Input.GetButtonDown(jumpInput))
+        //change state to hook
+        if(Input.GetButtonDown(hookModeInput))
         {
-            jumpPressed = true;
-            holdJump = true;
+            playerState = PlayerState.Hook;
         }
-        else if(Input.GetButtonUp(jumpInput))
+        switch(playerState)
         {
-            holdJump = false;
+            case PlayerState.Normal:
+                InputForNormalState();
+                break;
+            case PlayerState.Hook:
+                //reset move
+                rigidVelocityx = 0;
+                //reset jump
+                currentJumpCount = jumpChances;
+                isJump = false;
+                isAir = false;
+                holdJump = false;
+                jumpPressed = false;
+                //reset attack
+                currentAttackTimes = 0;
+                attackPressed = false;
+
+                hookPressed = true;                
+                break;
         }
-        //get attack input
-        if (Input.GetButtonDown(attackInput))
-            attackPressed = true;
-        //change the face
-        if(rigidVelocityx!=0)
-            transform.localScale =new Vector3( Mathf.Sign(rigidVelocityx), 1, 1);
     }
     private void FixedUpdate()
     {
@@ -123,10 +144,36 @@ public class CharacterController : MonoBehaviour
         Attack();
         //adjust up and down jump feel
         AdjustJump();
+        if(hookPressed)
+        {
+            //execute hook
+            Evently.Instance.Publish(new ExecuteHookEvent(hook_test));
+        }
     }
     #endregion
 
     #region Function
+    private void InputForNormalState()
+    {
+        //get horizontal speed
+        rigidVelocityx = Input.GetAxis(xInput) * walkSpeed;
+        //get jump input
+        if (Input.GetButtonDown(jumpInput))
+        {
+            jumpPressed = true;
+            holdJump = true;
+        }
+        else if (Input.GetButtonUp(jumpInput))
+        {
+            holdJump = false;
+        }
+        //get attack input
+        if (Input.GetButtonDown(attackInput))
+            attackPressed = true;
+        //change the face
+        if (rigidVelocityx != 0)
+            transform.localScale = new Vector3(Mathf.Sign(rigidVelocityx), 1, 1);
+    }
     private void Move()
     {
         //set horizontal speed(in order to stop directly, give it a stopDeadzone)
@@ -213,7 +260,7 @@ public class CharacterController : MonoBehaviour
     }
     private void AdjustJump()
     {
-        Debug.Log(holdJump);
+        //Debug.Log(holdJump);
         //this is the speed for double jump
         if (rigid.velocity.y > 0 && jumpChances == 2 && currentJumpCount == 0)
         {
