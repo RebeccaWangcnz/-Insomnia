@@ -35,6 +35,10 @@ public class CharacterController : MonoBehaviour
     public float jumpSpeedUp_2;
     [Tooltip("adjust the rate when player is falling down")]
     public float jumpSpeedDown;
+    [Tooltip("the speed up for player holding jump button")]
+    public float speedForHolding;
+    [Tooltip("the speed up for player's second jump by holding jump button")]
+    public float speedForHolding_2;
 
     //private parameters
     //*******************************rigidbody********************
@@ -71,6 +75,8 @@ public class CharacterController : MonoBehaviour
     private bool isJump;
     //check whether player is not jump but in the air
     private bool isAir;
+    //player hold the jump button to get higher
+    private bool holdJump;
     #endregion
 
     #region Execute
@@ -90,7 +96,14 @@ public class CharacterController : MonoBehaviour
         rigidVelocityx = Input.GetAxis(xInput) * walkSpeed;
         //get jump input
         if (Input.GetButtonDown(jumpInput))
+        {
             jumpPressed = true;
+            holdJump = true;
+        }
+        else if(Input.GetButtonUp(jumpInput))
+        {
+            holdJump = false;
+        }
         //get attack input
         if (Input.GetButtonDown(attackInput))
             attackPressed = true;
@@ -102,51 +115,26 @@ public class CharacterController : MonoBehaviour
     {
         //check grounded
         isGrounded= IsGrounded();
-        //set horizontal speed(in order to stop directly, give it a stopDeadzone)
-        if (Mathf.Abs(rigidVelocityx * Time.deltaTime) > stopDeadzone)
-            rigid.velocity = new Vector2(rigidVelocityx*Time.deltaTime, rigid.velocity.y);
-        else
-            rigid.velocity = new Vector2(0, rigid.velocity.y);
+        //player move
+        Move();
         //jump execute
         Jump();
         //execute attack
-        if(attackPressed&&allowAttackInput)
-        {
-            //set attack combo
-            if(canTriggerCombo)
-            {
-                currentAttackTimes=(++currentAttackTimes)% totalAttackTimes;
-            }
-            else
-            {
-                currentAttackTimes = 0;
-            }
-            //Debug.Log(currentAttackTimes);
-            //attack
-            Evently.Instance.Publish(new NormalAttackEvent(currentAttackTimes));
-            //reset attackPressed
-            attackPressed = false;
-            //disabled attack input
-            allowAttackInput = false;
-        }
+        Attack();
         //adjust up and down jump feel
-        //this is the speed for double jump
-        if(rigid.velocity.y > 0&&jumpChances==2&&currentJumpCount==0)
-        {
-            rigid.velocity -= new Vector2(0, jumpSpeedUp_2 * Time.deltaTime);
-        }
-        else if(rigid.velocity.y>0)
-        {
-            rigid.velocity -=new Vector2(0, jumpSpeedUp * Time.deltaTime) ;
-        }
-        else if(rigid.velocity.y<0)
-        {
-            rigid.velocity -= new Vector2(0, jumpSpeedDown * Time.deltaTime);
-        }
+        AdjustJump();
     }
     #endregion
 
     #region Function
+    private void Move()
+    {
+        //set horizontal speed(in order to stop directly, give it a stopDeadzone)
+        if (Mathf.Abs(rigidVelocityx * Time.deltaTime) > stopDeadzone)
+            rigid.velocity = new Vector2(rigidVelocityx * Time.deltaTime, rigid.velocity.y);
+        else
+            rigid.velocity = new Vector2(0, rigid.velocity.y);
+    }
     private void Jump()
     {
         //Debug.Log(currentJumpCount);
@@ -161,6 +149,8 @@ public class CharacterController : MonoBehaviour
                 //set isJump false
                 isJump = false;
                 isAir = false;
+                //stop hold jump
+                holdJump = false;
                 //forbid jump input available when you in the air
                 jumpPressed = false;
             }
@@ -185,6 +175,28 @@ public class CharacterController : MonoBehaviour
             jumpPressed = false;
         }
     }
+    private void Attack()
+    {
+        if (attackPressed && allowAttackInput)
+        {
+            //set attack combo
+            if (canTriggerCombo)
+            {
+                currentAttackTimes = (++currentAttackTimes) % totalAttackTimes;
+            }
+            else
+            {
+                currentAttackTimes = 0;
+            }
+            //Debug.Log(currentAttackTimes);
+            //attack
+            Evently.Instance.Publish(new NormalAttackEvent(currentAttackTimes));
+            //reset attackPressed
+            attackPressed = false;
+            //disabled attack input
+            allowAttackInput = false;
+        }
+    }
     private bool IsGrounded()
     {
         int layermask = ~(1 << 6);
@@ -198,6 +210,28 @@ public class CharacterController : MonoBehaviour
         }
         return false;
 
+    }
+    private void AdjustJump()
+    {
+        Debug.Log(holdJump);
+        //this is the speed for double jump
+        if (rigid.velocity.y > 0 && jumpChances == 2 && currentJumpCount == 0)
+        {
+            rigid.velocity -= new Vector2(0, jumpSpeedUp_2 * Time.deltaTime);
+            //if holding jump button,give a force up to jump higher
+            if (holdJump)
+                rigid.velocity += new Vector2(0, speedForHolding_2 * Time.deltaTime);
+        }
+        else if (rigid.velocity.y > 0)
+        {
+            rigid.velocity -= new Vector2(0, jumpSpeedUp * Time.deltaTime);
+            if (holdJump)
+                rigid.velocity += new Vector2(0, speedForHolding * Time.deltaTime);
+        }
+        else if (rigid.velocity.y < 0)
+        {
+            rigid.velocity -= new Vector2(0, jumpSpeedDown * Time.deltaTime);
+        }
     }
     #endregion
 }
