@@ -92,9 +92,6 @@ public class CharacterController : MonoBehaviour
     //check if the hookButton is pressed,this is for fixedupdate to get the info of update
     [HideInInspector]
     public bool hookPressed;
-    //check if in hooking(make sure that the player has hooked, not just enter the hook mode)
-    [HideInInspector]
-    public  bool inHooking;
     //store the initialSpeed after hook
     [HideInInspector]
     public float initialSpeedAfterHook;
@@ -126,10 +123,14 @@ public class CharacterController : MonoBehaviour
                 AttackInput();
                 ChangePlayerFace();
                 break;
-            case PlayerState.Hook:
+            case PlayerState.PrepareHook:
                 ResetMove();
                 ResetJump();
-                ResetAttack();                  
+                ResetAttack();
+                StartHookingInput();
+                break;
+            case PlayerState.Hook:
+                StartHookingInput();
                 break;
         }
     }
@@ -158,13 +159,12 @@ public class CharacterController : MonoBehaviour
         //if player is not in the normal state, he cannot enter hook mode(也许afterhook状态也可以直接切换到hook模式)
         if (Input.GetButtonDown(hookModeInput) && playerState == PlayerState.Normal)
         {
-            playerState = PlayerState.Hook;
+            playerState = PlayerState.PrepareHook;
         }
-        else if (Input.GetButtonUp(hookModeInput))
+        else if (Input.GetButtonUp(hookModeInput)&& playerState == PlayerState.PrepareHook)
         {
             //if player hasn't hooked,but enter the hook mode, change state back to normal
-            if (playerState == PlayerState.Hook && !inHooking)
-                playerState = PlayerState.Normal;
+            playerState = PlayerState.Normal;
         }
     }
     private void StartHookingInput()
@@ -172,8 +172,7 @@ public class CharacterController : MonoBehaviour
         //player can press mouse0 when in the hook state to start hook move
         if (Input.GetButtonDown(attackInput))
         {
-            hookPressed = true;
-            inHooking = true;
+            hookPressed = true;           
         }
         else if (Input.GetButtonUp(attackInput))
         {
@@ -216,11 +215,12 @@ public class CharacterController : MonoBehaviour
    {
         if (hookPressed)
         {
+            playerState = PlayerState.Hook;
             //execute hook
             Evently.Instance.Publish(new ExecuteHookEvent(hook_test));
         }
         //to check if the player release the mouse0(has entered the hook state)
-        else if (inHooking)
+        else if (playerState == PlayerState.Hook)
         {
             Evently.Instance.Publish(new AfterHookEvent(hook_test));
         }
@@ -368,7 +368,6 @@ public class CharacterController : MonoBehaviour
     private void ResetHook()
     {
         hookPressed = false;
-        inHooking = false;
     }
     #endregion
 }

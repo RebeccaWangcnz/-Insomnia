@@ -67,14 +67,12 @@ public class HookSystem : MonoBehaviour
             player.initialSpeedAfterHook = player.rigid.velocity.x;
             player.playerState = PlayerState.AfterBigHook;
             player.hookPressed = false;
-            player.inHooking = false;
         }
         else
         {
             evt.hookRigid.velocity = Vector2.zero;
             player.playerState = PlayerState.Normal;
             player.hookPressed = false;
-            player.inHooking = false;
         }
     }
 }
