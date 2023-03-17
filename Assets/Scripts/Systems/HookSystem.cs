@@ -19,20 +19,64 @@ public class HookSystem : MonoBehaviour
     [Tooltip("the nearest distance hook stop")]
     public float hookStopThreshold;
 
+    [Header("Finding Hook Params")]
+    public float findingRadius;
+
     //private parameters
     //distance between player and hook
     private float distance;
     //the flying direction of player(- is the direction of hook)
     private Vector3 direction;
+    //the nearest hook
+    private Collider2D nearestHook=null;
+    //all the hooks
+    private Collider2D[] hooks=null;
     private void OnEnable()
     {
         Evently.Instance.Subscribe<ExecuteHookEvent>(ExecuteHook);
         Evently.Instance.Subscribe<AfterHookEvent>(AfterHook);
+        Evently.Instance.Subscribe<FindingHookEvent>(FindingHook);
+        Evently.Instance.Subscribe<PrepareHookEvent>(PrepareHook);
+        Evently.Instance.Subscribe<ResetHookParamsEvent>(ResetHookParams);
     }
     private void OnDisable()
     {
         Evently.Instance.Unsubscribe<ExecuteHookEvent>(ExecuteHook);
         Evently.Instance.Unsubscribe<AfterHookEvent>(AfterHook);
+        Evently.Instance.Unsubscribe<FindingHookEvent>(FindingHook);
+        Evently.Instance.Unsubscribe<PrepareHookEvent>(PrepareHook);
+        Evently.Instance.Unsubscribe<ResetHookParamsEvent>(ResetHookParams);
+    }
+    //detect sphere
+    private void OnDrawGizmos()
+    {
+        //draw sphere
+        Gizmos.DrawWireSphere(player.transform.position, findingRadius);
+    }
+    private void PrepareHook(PrepareHookEvent evt)
+    {
+        hooks = Physics2D.OverlapCircleAll(player.transform.position, findingRadius, 1 << 7);
+    }
+    private void FindingHook(FindingHookEvent evt)
+    {
+        if (hooks == null||hooks.Length==0)
+            return;
+        nearestHook = hooks[0];
+        foreach (var hook in hooks)
+        {
+            //Debug.Log("hook:"+hook.name +Vector2.Distance(evt.mousePos, hook.transform.position)+","+"nearest:"+nearestHook.name + Vector2.Distance(evt.mousePos, nearestHook.transform.position));
+            Debug.Log(evt.mousePos);
+            if (Vector2.Distance(evt.mousePos, hook.transform.position) < Vector2.Distance(evt.mousePos, nearestHook.transform.position))
+            {
+                nearestHook = hook;
+            }
+        }
+        player.hook_test = nearestHook.GetComponent<HookComponent>();
+    }
+    private void ResetHookParams(ResetHookParamsEvent evt)
+    {
+        hooks = null;
+        nearestHook = null;
     }
     private void ExecuteHook(ExecuteHookEvent evt)
     {
@@ -66,13 +110,13 @@ public class HookSystem : MonoBehaviour
             player.rigid.velocity = direction * playerStopForce;
             player.initialSpeedAfterHook = player.rigid.velocity.x;
             player.playerState = PlayerState.AfterBigHook;
-            player.hookPressed = false;
         }
         else
         {
             evt.hookRigid.velocity = Vector2.zero;
-            player.playerState = PlayerState.Normal;
-            player.hookPressed = false;
+            player.playerState = PlayerState.Normal;            
         }
+        player.hookPressed = false;
+        player.hook_test = null;
     }
 }

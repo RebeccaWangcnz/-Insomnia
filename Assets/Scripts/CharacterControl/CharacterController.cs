@@ -10,6 +10,7 @@ public class CharacterController : MonoBehaviour
     [Header("Player Info")]
     //*********************************player state*************
     public PlayerState playerState;
+    public Camera mainCamera;
     [Header("BasicMove")]
     //********************input********************
     [Tooltip("the input for move horizontally")]
@@ -112,6 +113,7 @@ public class CharacterController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        ChangeColor();
         //change state to hook
         HookModeInput();
         switch (playerState)
@@ -128,6 +130,7 @@ public class CharacterController : MonoBehaviour
                 ResetJump();
                 ResetAttack();
                 StartHookingInput();
+                Evently.Instance.Publish(new FindingHookEvent(mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, mainCamera.transform.position.z*-1))));
                 break;
             case PlayerState.Hook:
                 StartHookingInput();
@@ -160,11 +163,14 @@ public class CharacterController : MonoBehaviour
         if (Input.GetButtonDown(hookModeInput) && playerState == PlayerState.Normal)
         {
             playerState = PlayerState.PrepareHook;
+            Evently.Instance.Publish(new PrepareHookEvent());
         }
-        else if (Input.GetButtonUp(hookModeInput)&& playerState == PlayerState.PrepareHook)
+        else if (Input.GetButtonDown(hookModeInput)&& playerState == PlayerState.PrepareHook)
         {
             //if player hasn't hooked,but enter the hook mode, change state back to normal
             playerState = PlayerState.Normal;
+            Evently.Instance.Publish(new ResetHookParamsEvent());
+            hook_test = null;
         }
     }
     private void StartHookingInput()
@@ -172,6 +178,7 @@ public class CharacterController : MonoBehaviour
         //player can press mouse0 when in the hook state to start hook move
         if (Input.GetButtonDown(attackInput))
         {
+            Evently.Instance.Publish(new ResetHookParamsEvent());
             hookPressed = true;           
         }
         else if (Input.GetButtonUp(attackInput))
@@ -368,6 +375,19 @@ public class CharacterController : MonoBehaviour
     private void ResetHook()
     {
         hookPressed = false;
+    }
+    //******************************Other*****************************************************
+    //该方法只用于测试
+    private void ChangeColor()
+    {
+        if(playerState==PlayerState.PrepareHook)
+        {
+            GetComponentInChildren<SpriteRenderer>().color = Color.yellow;
+        }
+        else
+        {
+            GetComponentInChildren<SpriteRenderer>().color = new Color(150,184,255);
+        }
     }
     #endregion
 }
