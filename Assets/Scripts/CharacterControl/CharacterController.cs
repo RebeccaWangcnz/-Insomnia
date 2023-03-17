@@ -23,8 +23,10 @@ public class CharacterController : MonoBehaviour
     //*********************walk**********************
     [Tooltip("the speed for walking")]
     public float walkSpeed;
-    [Tooltip("the max velocityx for stop walking")] 
+    [Tooltip("the max velocityx for stop walking")]
     public float stopDeadzone;
+    [Tooltip("the propertion for player's move afterbighook")]
+    public float AfterBigHookSpeed;
     //********************jump*********************
     [Tooltip("the ground point of player,used for ray which checks the ground")]
     public Transform groundPoint;
@@ -86,8 +88,16 @@ public class CharacterController : MonoBehaviour
     //player hold the jump button to get higher
     private bool holdJump;
     //***********************hook***********************************
+    //hook state and inHooking, hook state contains preparehook and inhooking 2 states
+    //check if the hookButton is pressed,this is for fixedupdate to get the info of update
     [HideInInspector]
     public bool hookPressed;
+    //check if in hooking(make sure that the player has hooked, not just enter the hook mode)
+    [HideInInspector]
+    public  bool inHooking;
+    //store the initialSpeed after hook
+    [HideInInspector]
+    public float initialSpeedAfterHook;
     #endregion
 
     #region Execute
@@ -106,29 +116,20 @@ public class CharacterController : MonoBehaviour
     void Update()
     {
         //change state to hook
-        if(Input.GetButtonDown(hookModeInput))
-        {
-            playerState = PlayerState.Hook;
-        }
-        switch(playerState)
+        HookModeInput();
+        switch (playerState)
         {
             case PlayerState.Normal:
-                InputForNormalState();
+            case PlayerState.AfterBigHook:
+                MoveInput();
+                JumpInput();
+                AttackInput();
+                ChangePlayerFace();
                 break;
             case PlayerState.Hook:
-                //reset move
-                rigidVelocityx = 0;
-                //reset jump
-                currentJumpCount = jumpChances;
-                isJump = false;
-                isAir = false;
-                holdJump = false;
-                jumpPressed = false;
-                //reset attack
-                currentAttackTimes = 0;
-                attackPressed = false;
-
-                hookPressed = true;                
+                ResetMove();
+                ResetJump();
+                ResetAttack();                  
                 break;
         }
     }
@@ -144,19 +145,48 @@ public class CharacterController : MonoBehaviour
         Attack();
         //adjust up and down jump feel
         AdjustJump();
-        if(hookPressed)
-        {
-            //execute hook
-            Evently.Instance.Publish(new ExecuteHookEvent(hook_test));
-        }
+        //start hook
+        HookExecute();
     }
     #endregion
 
     #region Function
-    private void InputForNormalState()
+    //****************************Input(Update)************************************
+
+    private void HookModeInput()
+    {
+        //if player is not in the normal state, he cannot enter hook mode(也许afterhook状态也可以直接切换到hook模式)
+        if (Input.GetButtonDown(hookModeInput) && playerState == PlayerState.Normal)
+        {
+            playerState = PlayerState.Hook;
+        }
+        else if (Input.GetButtonUp(hookModeInput))
+        {
+            //if player hasn't hooked,but enter the hook mode, change state back to normal
+            if (playerState == PlayerState.Hook && !inHooking)
+                playerState = PlayerState.Normal;
+        }
+    }
+    private void StartHookingInput()
+    {
+        //player can press mouse0 when in the hook state to start hook move
+        if (Input.GetButtonDown(attackInput))
+        {
+            hookPressed = true;
+            inHooking = true;
+        }
+        else if (Input.GetButtonUp(attackInput))
+        {
+            hookPressed = false;
+        }
+    }
+    private void MoveInput()
     {
         //get horizontal speed
         rigidVelocityx = Input.GetAxis(xInput) * walkSpeed;
+    }
+    private void JumpInput()
+    {
         //get jump input
         if (Input.GetButtonDown(jumpInput))
         {
@@ -167,20 +197,52 @@ public class CharacterController : MonoBehaviour
         {
             holdJump = false;
         }
+    }
+    private void AttackInput()
+    {
         //get attack input
         if (Input.GetButtonDown(attackInput))
             attackPressed = true;
+    }
+    private void ChangePlayerFace()
+    {
         //change the face
         if (rigidVelocityx != 0)
             transform.localScale = new Vector3(Mathf.Sign(rigidVelocityx), 1, 1);
     }
+
+    //**************************************Execute(FixedUpdate)************************************
+   private void HookExecute()
+   {
+        if (hookPressed)
+        {
+            //execute hook
+            Evently.Instance.Publish(new ExecuteHookEvent(hook_test));
+        }
+        //to check if the player release the mouse0(has entered the hook state)
+        else if (inHooking)
+        {
+            Evently.Instance.Publish(new AfterHookEvent(hook_test));
+        }
+    }
     private void Move()
     {
-        //set horizontal speed(in order to stop directly, give it a stopDeadzone)
-        if (Mathf.Abs(rigidVelocityx * Time.deltaTime) > stopDeadzone)
-            rigid.velocity = new Vector2(rigidVelocityx * Time.deltaTime, rigid.velocity.y);
-        else
-            rigid.velocity = new Vector2(0, rigid.velocity.y);
+        //when there's no initial speed
+        if(playerState==PlayerState.Normal)
+        {
+            //set horizontal speed(in order to stop directly, give it a stopDeadzone)
+            if (Mathf.Abs(rigidVelocityx * Time.deltaTime) > stopDeadzone)
+                rigid.velocity = new Vector2(rigidVelocityx * Time.deltaTime, rigid.velocity.y);
+            else
+                rigid.velocity = new Vector2(0, rigid.velocity.y);
+        }
+        else if(playerState==PlayerState.AfterBigHook)
+        {
+            //后退有无力感，但是前进还不错
+            rigid.velocity =new Vector2(initialSpeedAfterHook+ rigidVelocityx * Time.deltaTime*AfterBigHookSpeed, rigid.velocity.y);
+            //可以模拟很好的阻力，但是前进会很扯
+            rigid.velocity += new Vector2(rigidVelocityx * Time.deltaTime * AfterBigHookSpeed, 0);
+        }
     }
     private void Jump()
     {
@@ -200,6 +262,8 @@ public class CharacterController : MonoBehaviour
                 holdJump = false;
                 //forbid jump input available when you in the air
                 jumpPressed = false;
+                //the player state maybe afterbighook, so we set it to normal
+                playerState=PlayerState.Normal;
             }
         }
         //when player is in the air but not because of the jump, player's jump chances should minus 1
@@ -213,7 +277,9 @@ public class CharacterController : MonoBehaviour
         {
             //speed for double jump
             if(jumpChances == 2 && currentJumpCount == 1)
+            {
                 rigid.velocity = new Vector2(rigid.velocity.x, jumpSpeed_2 * Time.deltaTime);
+            }
             //speed for first jump
             else
                 rigid.velocity = new Vector2(rigid.velocity.x, jumpSpeed * Time.deltaTime);
@@ -279,6 +345,30 @@ public class CharacterController : MonoBehaviour
         {
             rigid.velocity -= new Vector2(0, jumpSpeedDown * Time.deltaTime);
         }
+    }
+    //*********************************Reset Params*********************************************
+    private void ResetAttack()
+    {
+        currentAttackTimes = 0;
+        attackPressed = false;
+        StartHookingInput();
+    }
+    private void ResetMove()
+    {
+        rigidVelocityx = 0;
+    }
+    private void ResetJump()
+    {
+        currentJumpCount = jumpChances;
+        isJump = false;
+        isAir = false;
+        holdJump = false;
+        jumpPressed = false;
+    }
+    private void ResetHook()
+    {
+        hookPressed = false;
+        inHooking = false;
     }
     #endregion
 }

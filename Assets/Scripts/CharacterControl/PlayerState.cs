@@ -8,4 +8,6 @@ public enum PlayerState
     Normal,
     //player cannot move,jump,attack
     Hook,
+    //the state after big hook, when player flying according to momentum
+    AfterBigHook
 }

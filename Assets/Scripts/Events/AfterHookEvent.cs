@@ -2,12 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ExecuteHookEvent
+public class AfterHookEvent
 {
     public HookComponent hook;
     public HookType hookType;
     public Rigidbody2D hookRigid;
-    public ExecuteHookEvent(HookComponent _hook)//构造函数
+    public AfterHookEvent(HookComponent _hook)//构造函数
     {
         hook = _hook;
         //get the hook type
