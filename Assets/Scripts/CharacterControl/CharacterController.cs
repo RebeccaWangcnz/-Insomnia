@@ -126,9 +126,9 @@ public class CharacterController : MonoBehaviour
                 ChangePlayerFace();
                 break;
             case PlayerState.PrepareHook:
-                ResetMove();
-                ResetJump();
-                ResetAttack();
+                //ResetMove();
+                //ResetJump();
+                //ResetAttack();
                 StartHookingInput();
                 Evently.Instance.Publish(new FindingHookEvent(mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, mainCamera.transform.position.z*-1))));
                 break;
@@ -170,7 +170,10 @@ public class CharacterController : MonoBehaviour
         if (Input.GetButtonDown(attackInput))
         {
             Evently.Instance.Publish(new ResetHookParamsEvent());
-            hookPressed = true;           
+            hookPressed = true; 
+            //when hook is available then the game continue
+            if(hook_test)
+                Time.timeScale = 1.0f;
         }
         else if (Input.GetButtonUp(attackInput))
         {
@@ -226,21 +229,21 @@ public class CharacterController : MonoBehaviour
     private void Move()
     {
         //when there's no initial speed
-        //if(playerState==PlayerState.Normal)
-        //{
+        if(playerState==PlayerState.Normal)
+        {
             //set horizontal speed(in order to stop directly, give it a stopDeadzone)
             if (Mathf.Abs(rigidVelocityx * Time.deltaTime) > stopDeadzone)
                 rigid.velocity = new Vector2(rigidVelocityx * Time.deltaTime, rigid.velocity.y);
             else
                 rigid.velocity = new Vector2(0, rigid.velocity.y);
-        //}
-        //else if(playerState==PlayerState.AfterBigHook)
-        //{
-        //    //后退有无力感，但是前进还不错
-        //    rigid.velocity =new Vector2(initialSpeedAfterHook+ rigidVelocityx * Time.deltaTime*AfterBigHookSpeed, rigid.velocity.y);
-        //    //可以模拟很好的阻力，但是前进会很扯
-        //    rigid.velocity += new Vector2(rigidVelocityx * Time.deltaTime * AfterBigHookSpeed, 0);
-        //}
+        }
+        else if(playerState==PlayerState.AfterBigHook)
+        {
+            //后退有无力感，但是前进还不错
+            rigid.velocity =new Vector2(initialSpeedAfterHook+ rigidVelocityx * Time.deltaTime*AfterBigHookSpeed, rigid.velocity.y);
+            //可以模拟很好的阻力，但是前进会很扯
+            rigid.velocity += new Vector2(rigidVelocityx * Time.deltaTime * AfterBigHookSpeed, 0);
+        }
     }
     private void Jump()
     {
@@ -310,7 +313,7 @@ public class CharacterController : MonoBehaviour
     }
     private bool IsGrounded()
     {
-        int layermask = ~(1 << 6);
+        int layermask = ~(1 << 6)&~(1<<8);
         Vector3 rayStart_1 = groundPoint.position - new Vector3(rayDistance,0,0);
         Vector3 rayStart_2 = groundPoint.position + new Vector3(rayDistance,0,0);
         if (Physics2D.Raycast(rayStart_1, -transform.up,rayLength,layermask)|| Physics2D.Raycast(rayStart_2, -transform.up, rayLength,layermask)) 

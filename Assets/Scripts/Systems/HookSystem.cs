@@ -64,7 +64,7 @@ public class HookSystem : MonoBehaviour
             //Debug.Log("hook:"+hook.name +Vector2.Distance(evt.mousePos, hook.transform.position)+","+"nearest:"+nearestHook.name + Vector2.Distance(evt.mousePos, nearestHook.transform.position));
             //Debug.Log(evt.mousePos);
             //change player facing
-            var direction = player.transform.position.x- evt.mousePos.x;
+            var direction = evt.mousePos.x- player.transform.position.x;
             if (direction!= 0)
                 player.transform.localScale = new Vector3(Mathf.Sign(direction), 1, 1);
             //find the nearest hook to mouse pos
@@ -74,7 +74,7 @@ public class HookSystem : MonoBehaviour
             }
         }
         //check if it is occluded
-        var layermask = ~(1 << 6);
+        var layermask = ~(1 << 6) & ~(1 << 8);
         var dir = nearestHook.transform.position - player.transform.position;
         //draw line on the screen
         Debug.DrawRay(player.transform.position, dir, Color.blue);
@@ -97,6 +97,7 @@ public class HookSystem : MonoBehaviour
     private void ExecuteHook(ExecuteHookEvent evt)
     {
         
+        Time.timeScale = 1f;
         distance = Vector2.Distance(evt.hook.transform.position, player.transform.position);
         direction = Vector3.Normalize(evt.hook.transform.position - player.transform.position);
         if (evt.hookType==HookType.big)
@@ -143,14 +144,16 @@ public class HookSystem : MonoBehaviour
     }
     private void EnterOrExitHookMode(EnterOrExitHookModeEvent evt)
     {
-        if(player.playerState == PlayerState.Normal)
+        if(player.playerState == PlayerState.Normal|| player.playerState == PlayerState.AfterBigHook)
         {
             //if player is not in the normal state, he cannot enter hook mode(也许afterhook状态也可以直接切换到hook模式)
+            Time.timeScale = 0f;
             player.playerState = PlayerState.PrepareHook;
             PrepareHook();
         }
         else if(player.playerState == PlayerState.PrepareHook)
         {
+            Time.timeScale = 1f;
             //if player hasn't hooked,but enter the hook mode, change state back to normal
             player.playerState = PlayerState.Normal;
             ResetLine();
