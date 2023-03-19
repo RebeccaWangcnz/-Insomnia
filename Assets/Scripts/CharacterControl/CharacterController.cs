@@ -113,6 +113,7 @@ public class CharacterController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //change player's color to show the states
         ChangeColor();
         //change state to hook
         HookModeInput();
@@ -242,7 +243,7 @@ public class CharacterController : MonoBehaviour
             //后退有无力感，但是前进还不错
             rigid.velocity =new Vector2(initialSpeedAfterHook+ rigidVelocityx * Time.deltaTime*AfterBigHookSpeed, rigid.velocity.y);
             //可以模拟很好的阻力，但是前进会很扯
-            rigid.velocity += new Vector2(rigidVelocityx * Time.deltaTime * AfterBigHookSpeed, 0);
+            //rigid.velocity += new Vector2(rigidVelocityx * Time.deltaTime * AfterBigHookSpeed, 0);
         }
     }
     private void Jump()

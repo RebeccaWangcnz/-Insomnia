@@ -36,6 +36,7 @@ public class HookSystem : MonoBehaviour
     private PlayerState stateBeforeHook;
     private void OnEnable()
     {
+        ResetLine();
         Evently.Instance.Subscribe<EnterOrExitHookModeEvent>(EnterOrExitHookMode);
         Evently.Instance.Subscribe<FindingHookEvent>(FindingHook);
         Evently.Instance.Subscribe<ExecuteHookEvent>(ExecuteHook);
@@ -56,10 +57,15 @@ public class HookSystem : MonoBehaviour
         //draw sphere
         Gizmos.DrawWireSphere(player.transform.position, findingRadius);
     }
+    //the event to find proper hook
+    //1. the hook is visible for player
+    //2. no wall between hook and player
     private void FindingHook(FindingHookEvent evt)
     {
+        //if no hook is visible
         if (hooks == null||hooks.Length==0)
             return;
+        //find the nearset hook to mouse
         nearestHook = hooks[0];
         foreach (var hook in hooks)
         {
@@ -81,7 +87,8 @@ public class HookSystem : MonoBehaviour
         //draw line on the screen
         Debug.DrawRay(player.transform.position, dir, Color.blue);
         var raycast = Physics2D.Raycast(player.transform.position, dir, findingRadius, layermask);
-        //something between player and hook
+        //if there's something between player and hook, set hook to nll and draw a red line to remind player
+        //else give the nearest one to player
         if (raycast&&!raycast.collider.GetComponent<HookComponent>())
         {
             //Debug.Log("has occlusion");
@@ -98,7 +105,7 @@ public class HookSystem : MonoBehaviour
 
     private void ExecuteHook(ExecuteHookEvent evt)
     {
-        
+        //set timascale to normal
         Time.timeScale = 1f;
         distance = Vector2.Distance(evt.hook.transform.position, player.transform.position);
         direction = Vector3.Normalize(evt.hook.transform.position - player.transform.position);
@@ -125,6 +132,7 @@ public class HookSystem : MonoBehaviour
                 DrawLine(evt.hook.transform.position, Color.blue);
         }        
     }
+    //the event when the mouse0 is up
     private void AfterHook(AfterHookEvent evt)
     {
         if (evt.hookType == HookType.big)
@@ -140,6 +148,7 @@ public class HookSystem : MonoBehaviour
             evt.hookRigid.velocity = Vector2.zero;
             player.playerState = PlayerState.Normal;            
         }
+        //if player hasn't end the hook initiatively, the player.hookPressed maybe true, so set it to false
         player.hookPressed = false;
         player.hook_test = null;
         ResetLine();
@@ -172,6 +181,7 @@ public class HookSystem : MonoBehaviour
     }
 
     #region FUNCTION
+    //get all the visible hooks
     private void PrepareHook()
     {
         hooks = Physics2D.OverlapCircleAll(player.transform.position, findingRadius, 1 << 7);
