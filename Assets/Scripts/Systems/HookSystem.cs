@@ -32,6 +32,8 @@ public class HookSystem : MonoBehaviour
     private Collider2D nearestHook=null;
     //all the hooks
     private Collider2D[] hooks=null;
+    //remember the state before hook
+    private PlayerState stateBeforeHook;
     private void OnEnable()
     {
         Evently.Instance.Subscribe<EnterOrExitHookModeEvent>(EnterOrExitHookMode);
@@ -146,6 +148,7 @@ public class HookSystem : MonoBehaviour
     {
         if(player.playerState == PlayerState.Normal|| player.playerState == PlayerState.AfterBigHook)
         {
+            stateBeforeHook = player.playerState;
             //if player is not in the normal state, he cannot enter hook mode(也许afterhook状态也可以直接切换到hook模式)
             Time.timeScale = 0f;
             player.playerState = PlayerState.PrepareHook;
@@ -155,7 +158,7 @@ public class HookSystem : MonoBehaviour
         {
             Time.timeScale = 1f;
             //if player hasn't hooked,but enter the hook mode, change state back to normal
-            player.playerState = PlayerState.Normal;
+            player.playerState = stateBeforeHook;
             ResetLine();
             ResetHookParams(new ResetHookParamsEvent());
             player.hook_test = null;
