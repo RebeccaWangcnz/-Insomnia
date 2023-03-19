@@ -159,18 +159,9 @@ public class CharacterController : MonoBehaviour
 
     private void HookModeInput()
     {
-        //if player is not in the normal state, he cannot enter hook mode(也许afterhook状态也可以直接切换到hook模式)
-        if (Input.GetButtonDown(hookModeInput) && playerState == PlayerState.Normal)
+        if (Input.GetButtonDown(hookModeInput))
         {
-            playerState = PlayerState.PrepareHook;
-            Evently.Instance.Publish(new PrepareHookEvent());
-        }
-        else if (Input.GetButtonDown(hookModeInput)&& playerState == PlayerState.PrepareHook)
-        {
-            //if player hasn't hooked,but enter the hook mode, change state back to normal
-            playerState = PlayerState.Normal;
-            Evently.Instance.Publish(new ResetHookParamsEvent());
-            hook_test = null;
+            Evently.Instance.Publish(new EnterOrExitHookModeEvent());
         }
     }
     private void StartHookingInput()
@@ -220,14 +211,14 @@ public class CharacterController : MonoBehaviour
     //**************************************Execute(FixedUpdate)************************************
    private void HookExecute()
    {
-        if (hookPressed)
+        if (hookPressed&&hook_test)
         {
             playerState = PlayerState.Hook;
             //execute hook
             Evently.Instance.Publish(new ExecuteHookEvent(hook_test));
         }
         //to check if the player release the mouse0(has entered the hook state)
-        else if (playerState == PlayerState.Hook)
+        else if (playerState == PlayerState.Hook&&hook_test)
         {
             Evently.Instance.Publish(new AfterHookEvent(hook_test));
         }
@@ -235,21 +226,21 @@ public class CharacterController : MonoBehaviour
     private void Move()
     {
         //when there's no initial speed
-        if(playerState==PlayerState.Normal)
-        {
+        //if(playerState==PlayerState.Normal)
+        //{
             //set horizontal speed(in order to stop directly, give it a stopDeadzone)
             if (Mathf.Abs(rigidVelocityx * Time.deltaTime) > stopDeadzone)
                 rigid.velocity = new Vector2(rigidVelocityx * Time.deltaTime, rigid.velocity.y);
             else
                 rigid.velocity = new Vector2(0, rigid.velocity.y);
-        }
-        else if(playerState==PlayerState.AfterBigHook)
-        {
-            //后退有无力感，但是前进还不错
-            rigid.velocity =new Vector2(initialSpeedAfterHook+ rigidVelocityx * Time.deltaTime*AfterBigHookSpeed, rigid.velocity.y);
-            //可以模拟很好的阻力，但是前进会很扯
-            rigid.velocity += new Vector2(rigidVelocityx * Time.deltaTime * AfterBigHookSpeed, 0);
-        }
+        //}
+        //else if(playerState==PlayerState.AfterBigHook)
+        //{
+        //    //后退有无力感，但是前进还不错
+        //    rigid.velocity =new Vector2(initialSpeedAfterHook+ rigidVelocityx * Time.deltaTime*AfterBigHookSpeed, rigid.velocity.y);
+        //    //可以模拟很好的阻力，但是前进会很扯
+        //    rigid.velocity += new Vector2(rigidVelocityx * Time.deltaTime * AfterBigHookSpeed, 0);
+        //}
     }
     private void Jump()
     {

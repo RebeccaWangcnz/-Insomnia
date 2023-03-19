@@ -21,6 +21,7 @@ public class HookSystem : MonoBehaviour
 
     [Header("Finding Hook Params")]
     public float findingRadius;
+    public LineRenderer line;
 
     //private parameters
     //distance between player and hook
@@ -33,18 +34,18 @@ public class HookSystem : MonoBehaviour
     private Collider2D[] hooks=null;
     private void OnEnable()
     {
+        Evently.Instance.Subscribe<EnterOrExitHookModeEvent>(EnterOrExitHookMode);
+        Evently.Instance.Subscribe<FindingHookEvent>(FindingHook);
         Evently.Instance.Subscribe<ExecuteHookEvent>(ExecuteHook);
         Evently.Instance.Subscribe<AfterHookEvent>(AfterHook);
-        Evently.Instance.Subscribe<FindingHookEvent>(FindingHook);
-        Evently.Instance.Subscribe<PrepareHookEvent>(PrepareHook);
         Evently.Instance.Subscribe<ResetHookParamsEvent>(ResetHookParams);
     }
     private void OnDisable()
     {
+        Evently.Instance.Unsubscribe<EnterOrExitHookModeEvent>(EnterOrExitHookMode);
+        Evently.Instance.Unsubscribe<FindingHookEvent>(FindingHook);
         Evently.Instance.Unsubscribe<ExecuteHookEvent>(ExecuteHook);
         Evently.Instance.Unsubscribe<AfterHookEvent>(AfterHook);
-        Evently.Instance.Unsubscribe<FindingHookEvent>(FindingHook);
-        Evently.Instance.Unsubscribe<PrepareHookEvent>(PrepareHook);
         Evently.Instance.Unsubscribe<ResetHookParamsEvent>(ResetHookParams);
     }
     //detect sphere
@@ -52,10 +53,6 @@ public class HookSystem : MonoBehaviour
     {
         //draw sphere
         Gizmos.DrawWireSphere(player.transform.position, findingRadius);
-    }
-    private void PrepareHook(PrepareHookEvent evt)
-    {
-        hooks = Physics2D.OverlapCircleAll(player.transform.position, findingRadius, 1 << 7);
     }
     private void FindingHook(FindingHookEvent evt)
     {
@@ -65,19 +62,38 @@ public class HookSystem : MonoBehaviour
         foreach (var hook in hooks)
         {
             //Debug.Log("hook:"+hook.name +Vector2.Distance(evt.mousePos, hook.transform.position)+","+"nearest:"+nearestHook.name + Vector2.Distance(evt.mousePos, nearestHook.transform.position));
-            Debug.Log(evt.mousePos);
+            //Debug.Log(evt.mousePos);
+            //change player facing
+            var direction = player.transform.position.x- evt.mousePos.x;
+            if (direction!= 0)
+                player.transform.localScale = new Vector3(Mathf.Sign(direction), 1, 1);
+            //find the nearest hook to mouse pos
             if (Vector2.Distance(evt.mousePos, hook.transform.position) < Vector2.Distance(evt.mousePos, nearestHook.transform.position))
             {
                 nearestHook = hook;
             }
         }
-        player.hook_test = nearestHook.GetComponent<HookComponent>();
+        //check if it is occluded
+        var layermask = ~(1 << 6);
+        var dir = nearestHook.transform.position - player.transform.position;
+        //draw line on the screen
+        Debug.DrawRay(player.transform.position, dir, Color.blue);
+        var raycast = Physics2D.Raycast(player.transform.position, dir, findingRadius, layermask);
+        //something between player and hook
+        if (raycast&&!raycast.collider.GetComponent<HookComponent>())
+        {
+            //Debug.Log("has occlusion");
+            nearestHook = null;
+            player.hook_test = null;
+            DrawLine(raycast.point,Color.red);
+        }
+        else
+        {
+            player.hook_test = nearestHook.GetComponent<HookComponent>();
+            DrawLine(nearestHook.transform.position,Color.green);
+        }
     }
-    private void ResetHookParams(ResetHookParamsEvent evt)
-    {
-        hooks = null;
-        nearestHook = null;
-    }
+
     private void ExecuteHook(ExecuteHookEvent evt)
     {
         
@@ -91,6 +107,9 @@ public class HookSystem : MonoBehaviour
             //stop flying
             if (distance < playerStopThreshold)
                 AfterHook(new AfterHookEvent(evt.hook));
+            else
+                DrawLine(evt.hook.transform.position, Color.blue);
+
         }
         else
         {
@@ -99,7 +118,9 @@ public class HookSystem : MonoBehaviour
             //stop hook flying
             if(distance<hookStopThreshold)
                 AfterHook(new AfterHookEvent(evt.hook));
-        }
+            else
+                DrawLine(evt.hook.transform.position, Color.blue);
+        }        
     }
     private void AfterHook(AfterHookEvent evt)
     {
@@ -118,5 +139,49 @@ public class HookSystem : MonoBehaviour
         }
         player.hookPressed = false;
         player.hook_test = null;
+        ResetLine();
     }
+    private void EnterOrExitHookMode(EnterOrExitHookModeEvent evt)
+    {
+        if(player.playerState == PlayerState.Normal)
+        {
+            //if player is not in the normal state, he cannot enter hook mode(也许afterhook状态也可以直接切换到hook模式)
+            player.playerState = PlayerState.PrepareHook;
+            PrepareHook();
+        }
+        else if(player.playerState == PlayerState.PrepareHook)
+        {
+            //if player hasn't hooked,but enter the hook mode, change state back to normal
+            player.playerState = PlayerState.Normal;
+            ResetLine();
+            ResetHookParams(new ResetHookParamsEvent());
+            player.hook_test = null;
+        }
+    }
+
+    private void ResetHookParams(ResetHookParamsEvent evt)
+    {
+        hooks = null;
+        nearestHook = null;
+    }
+
+    #region FUNCTION
+    private void PrepareHook()
+    {
+        hooks = Physics2D.OverlapCircleAll(player.transform.position, findingRadius, 1 << 7);
+    }
+    private void DrawLine(Vector2 endPos,Color lineCol)
+    {
+        line.enabled = true;
+        line.SetPosition(0, player.transform.position);
+        line.SetPosition(1, endPos);
+        line.startColor = line.endColor =lineCol;
+    }
+    private void ResetLine()
+    {
+        line.enabled = false;
+        line.SetPosition(0, Vector3.zero);
+        line.SetPosition(1, Vector3.zero);
+    }
+    #endregion
 }
