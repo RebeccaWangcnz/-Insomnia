@@ -9,7 +9,7 @@ public class PlayerAnimationEvent : MonoBehaviour
     private void Awake()
     {
         // get weapon collider
-        weaponCollider = GetComponentInChildren<WeaponComponent>().GetComponent<Collider2D>();
+        weaponCollider = GetComponentInChildren<PlayerWeaponComponent>().GetComponent<Collider2D>();
         //check if can attack
         playerController = GetComponent<CharacterController>();
     }

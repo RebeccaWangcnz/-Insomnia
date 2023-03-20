@@ -126,6 +126,11 @@ public class CharacterController : MonoBehaviour
                 AttackInput();
                 ChangePlayerFace();
                 break;
+            //case PlayerState.Attack:
+            //    ResetMove();
+            //    ResetJump();
+            //    AttackInput();
+            //    break;
             case PlayerState.PrepareHook:
                 //ResetMove();
                 //ResetJump();
@@ -294,6 +299,8 @@ public class CharacterController : MonoBehaviour
     {
         if (attackPressed && allowAttackInput)
         {
+            //set player state
+            //playerState = PlayerState.Attack;
             //set attack combo
             if (canTriggerCombo)
             {
@@ -358,6 +365,7 @@ public class CharacterController : MonoBehaviour
     private void ResetMove()
     {
         rigidVelocityx = 0;
+        //rigid.velocity = new Vector2(0, rigid.velocity.y);
     }
     private void ResetJump()
     {

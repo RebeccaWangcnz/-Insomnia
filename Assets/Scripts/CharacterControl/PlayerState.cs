@@ -11,5 +11,7 @@ public enum PlayerState
     //player cannot move,jump,attack
     Hook,
     //the state after big hook, when player flying according to momentum
-    AfterBigHook
+    AfterBigHook,
+    //player cannot move or jump when attack
+    Attack
 }

@@ -10,10 +10,12 @@ public class PhysicsAttackSystem : MonoBehaviour
     {
         Instantiate();
         Evently.Instance.Subscribe<NormalAttackEvent>(NormalAttack);
+        Evently.Instance.Subscribe<HitEvent>(Hit);
     }
     private void OnDisable()
     {
         Evently.Instance.Unsubscribe<NormalAttackEvent>(NormalAttack);
+        Evently.Instance.Unsubscribe<HitEvent>(Hit);
     }
     private void NormalAttack(NormalAttackEvent evt)
     {
@@ -32,9 +34,24 @@ public class PhysicsAttackSystem : MonoBehaviour
                 break;
         }
     }
+    //the hit feel when player hit enemy
+    private void Hit(HitEvent evt)
+    {
+        Debug.Log("hit enemy");
+        evt.enemy.state = EnemyState.BeHit;
+        evt.enemy.isHit = true;
+        FlashRed(evt.enemy.sprite);       
+    }
 
+    #region FUNCTION
     private void Instantiate()
     {
         playerAnim = player.GetComponent<Animator>();
     }
+    private void FlashRed(SpriteRenderer enemySprite)
+    {
+        enemySprite.color = Color.red;
+    }
+
+    #endregion
 }
