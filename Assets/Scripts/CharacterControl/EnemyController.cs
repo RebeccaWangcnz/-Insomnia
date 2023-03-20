@@ -24,6 +24,7 @@ public class EnemyController : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        //turn back
         if(state==EnemyState.BeHit&&isHit)
         {
             Invoke("FlashBack",0.1f);
@@ -34,6 +35,7 @@ public class EnemyController : MonoBehaviour
     public void FlashBack()
     {
         sprite.color = normalCol;
+        //change state to normal
         state = EnemyState.Normal;
     }
 }

@@ -38,8 +38,10 @@ public class PhysicsAttackSystem : MonoBehaviour
     private void Hit(HitEvent evt)
     {
         Debug.Log("hit enemy");
+        //change enemy state
         evt.enemy.state = EnemyState.BeHit;
         evt.enemy.isHit = true;
+        //turn red
         FlashRed(evt.enemy.sprite);       
     }
 
