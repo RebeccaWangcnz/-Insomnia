@@ -10,7 +10,7 @@ public class IdleBehavior : StateMachineBehaviour
         //reset animator bool
         animator.SetBool("combo1", false);
         animator.SetBool("combo2", false);
-        //animator.gameObject.GetComponent<CharacterController>().playerState = PlayerState.Normal;
+        animator.gameObject.GetComponent<CharacterController>().allowAttackInput = true;
     }
 
 }

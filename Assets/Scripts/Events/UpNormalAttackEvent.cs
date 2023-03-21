@@ -2,14 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NormalAttackEvent
+public class UpNormalAttackEvent
 {
     public int currentAttackTimes;
-    public bool isUpAttack;
-    public NormalAttackEvent(int attackTimes,bool _isUpAttack)//构造函数
+    public UpNormalAttackEvent(int attackTimes)//构造函数
     {
         //get the attack times for player
         currentAttackTimes = attackTimes;
-        isUpAttack = _isUpAttack;
     }
-}
+}   

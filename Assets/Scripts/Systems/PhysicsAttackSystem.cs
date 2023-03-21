@@ -19,6 +19,10 @@ public class PhysicsAttackSystem : MonoBehaviour
     }
     private void NormalAttack(NormalAttackEvent evt)
     {
+        if (evt.isUpAttack)
+            playerAnim.SetBool("upattack", true);
+        else
+            playerAnim.SetBool("upattack", false);
         //play attack animation according to combos
         switch (evt.currentAttackTimes)
         {

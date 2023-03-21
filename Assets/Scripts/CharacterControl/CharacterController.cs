@@ -21,6 +21,8 @@ public class CharacterController : MonoBehaviour
     public string attackInput;
     [Tooltip("the input for finding hook")]
     public string hookModeInput;
+    [Tooltip("the input for upper input")]
+    public string yInput;
     //*********************walk**********************
     [Tooltip("the speed for walking")]
     public float walkSpeed;
@@ -70,6 +72,8 @@ public class CharacterController : MonoBehaviour
     private int totalAttackTimes = 2;
     //current combo times
     private int currentAttackTimes;
+    //check if it is the upper attack
+    private bool isUpAttack;
     //whether attack is allowed
     [HideInInspector]
     public bool allowAttackInput;
@@ -208,7 +212,16 @@ public class CharacterController : MonoBehaviour
     {
         //get attack input
         if (Input.GetButtonDown(attackInput))
+        {
             attackPressed = true;
+        }
+        //check the attack direction
+        if (Input.GetAxis(yInput) > 0)
+        {
+            isUpAttack = true;
+        }
+        else
+            isUpAttack = false;
     }
     private void ChangePlayerFace()
     {
@@ -297,6 +310,7 @@ public class CharacterController : MonoBehaviour
     }
     private void Attack()
     {
+        Debug.Log(allowAttackInput);
         if (attackPressed && allowAttackInput)
         {
             //set player state
@@ -312,7 +326,7 @@ public class CharacterController : MonoBehaviour
             }
             //Debug.Log(currentAttackTimes);
             //attack
-            Evently.Instance.Publish(new NormalAttackEvent(currentAttackTimes));
+            Evently.Instance.Publish(new NormalAttackEvent(currentAttackTimes,isUpAttack));
             //reset attackPressed
             attackPressed = false;
             //disabled attack input
