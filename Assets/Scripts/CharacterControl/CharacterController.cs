@@ -100,6 +100,8 @@ public class CharacterController : MonoBehaviour
     //store the initialSpeed after hook
     [HideInInspector]
     public float initialSpeedAfterHook;
+    //**********************Animator***********************************
+    private Animator playerAnimator;
     #endregion
 
     #region Execute
@@ -113,6 +115,8 @@ public class CharacterController : MonoBehaviour
         jumpChances = 1;
         //set player state
         playerState = PlayerState.Normal;
+        //get animator
+        playerAnimator = GetComponent<Animator>();
     }
     // Update is called once per frame
     void Update()
@@ -250,6 +254,7 @@ public class CharacterController : MonoBehaviour
         //when there's no initial speed
         if(playerState==PlayerState.Normal)
         {
+            playerAnimator.SetFloat("movespeed", Mathf.Abs(rigidVelocityx * Time.deltaTime));
             //set horizontal speed(in order to stop directly, give it a stopDeadzone)
             if (Mathf.Abs(rigidVelocityx * Time.deltaTime) > stopDeadzone)
                 rigid.velocity = new Vector2(rigidVelocityx * Time.deltaTime, rigid.velocity.y);
@@ -310,7 +315,6 @@ public class CharacterController : MonoBehaviour
     }
     private void Attack()
     {
-        Debug.Log(allowAttackInput);
         if (attackPressed && allowAttackInput)
         {
             //set player state
