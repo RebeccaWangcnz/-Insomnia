@@ -204,6 +204,7 @@ public class CharacterController : MonoBehaviour
         //get jump input
         if (Input.GetButtonDown(jumpInput))
         {
+            playerAnimator.SetBool("grounded", false);
             jumpPressed = true;
             holdJump = true;
         }
@@ -275,6 +276,7 @@ public class CharacterController : MonoBehaviour
         //Debug.Log(jumpChances);
         if(isGrounded)
         {
+            playerAnimator.SetBool("grounded", true);
             //reset currentJumpCount
             currentJumpCount=jumpChances;
             //when player jump down to the ground
@@ -294,9 +296,12 @@ public class CharacterController : MonoBehaviour
         //when player is in the air but not because of the jump, player's jump chances should minus 1
         else if(!isGrounded&&!isJump)
         {
+            playerAnimator.SetBool("grounded", false);
             isAir = true;
             currentJumpCount = jumpChances - 1;
         }
+        else
+            playerAnimator.SetBool("grounded", false);
         //first jump
         if (jumpPressed && currentJumpCount>0)
         {
@@ -357,6 +362,7 @@ public class CharacterController : MonoBehaviour
         //this is the speed for double jump
         if (rigid.velocity.y > 0 && jumpChances == 2 && currentJumpCount == 0)
         {
+            playerAnimator.SetBool("down", false);
             rigid.velocity -= new Vector2(0, jumpSpeedUp_2 * Time.deltaTime);
             //if holding jump button,give a force up to jump higher
             if (holdJump)
@@ -364,12 +370,14 @@ public class CharacterController : MonoBehaviour
         }
         else if (rigid.velocity.y > 0)
         {
+            playerAnimator.SetBool("down", false);
             rigid.velocity -= new Vector2(0, jumpSpeedUp * Time.deltaTime);
             if (holdJump)
                 rigid.velocity += new Vector2(0, speedForHolding * Time.deltaTime);
         }
         else if (rigid.velocity.y < 0)
         {
+            playerAnimator.SetBool("down", true);
             rigid.velocity -= new Vector2(0, jumpSpeedDown * Time.deltaTime);
         }
     }
