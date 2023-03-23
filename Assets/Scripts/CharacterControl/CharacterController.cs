@@ -101,7 +101,8 @@ public class CharacterController : MonoBehaviour
     [HideInInspector]
     public float initialSpeedAfterHook;
     //**********************Animator***********************************
-    private Animator playerAnimator;
+    private Animator upperAnimator;
+    private Animator lowerAnimator;
     #endregion
 
     #region Execute
@@ -116,7 +117,9 @@ public class CharacterController : MonoBehaviour
         //set player state
         playerState = PlayerState.Normal;
         //get animator
-        playerAnimator = GetComponent<Animator>();
+        var animators = GetComponentsInChildren<Animator>();
+        upperAnimator = animators[0];
+        lowerAnimator = animators[1];
     }
     // Update is called once per frame
     void Update()
@@ -204,7 +207,8 @@ public class CharacterController : MonoBehaviour
         //get jump input
         if (Input.GetButtonDown(jumpInput))
         {
-            playerAnimator.SetBool("grounded", false);
+            upperAnimator.SetBool("grounded", false);
+            lowerAnimator.SetBool("grounded", false);
             jumpPressed = true;
             holdJump = true;
         }
@@ -255,7 +259,8 @@ public class CharacterController : MonoBehaviour
         //when there's no initial speed
         if(playerState==PlayerState.Normal)
         {
-            playerAnimator.SetFloat("movespeed", Mathf.Abs(rigidVelocityx * Time.deltaTime));
+            upperAnimator.SetFloat("movespeed", Mathf.Abs(rigidVelocityx * Time.deltaTime));
+            lowerAnimator.SetFloat("movespeed", Mathf.Abs(rigidVelocityx * Time.deltaTime));
             //set horizontal speed(in order to stop directly, give it a stopDeadzone)
             if (Mathf.Abs(rigidVelocityx * Time.deltaTime) > stopDeadzone)
                 rigid.velocity = new Vector2(rigidVelocityx * Time.deltaTime, rigid.velocity.y);
@@ -276,7 +281,8 @@ public class CharacterController : MonoBehaviour
         //Debug.Log(jumpChances);
         if(isGrounded)
         {
-            playerAnimator.SetBool("grounded", true);
+            upperAnimator.SetBool("grounded", true);
+            lowerAnimator.SetBool("grounded", true);
             //reset currentJumpCount
             currentJumpCount=jumpChances;
             //when player jump down to the ground
@@ -296,12 +302,16 @@ public class CharacterController : MonoBehaviour
         //when player is in the air but not because of the jump, player's jump chances should minus 1
         else if(!isGrounded&&!isJump)
         {
-            playerAnimator.SetBool("grounded", false);
+            upperAnimator.SetBool("grounded", false);
+            lowerAnimator.SetBool("grounded", false);
             isAir = true;
             currentJumpCount = jumpChances - 1;
         }
         else
-            playerAnimator.SetBool("grounded", false);
+        {
+            upperAnimator.SetBool("grounded", false);
+            lowerAnimator.SetBool("grounded", false);
+        }
         //first jump
         if (jumpPressed && currentJumpCount>0)
         {
@@ -362,7 +372,8 @@ public class CharacterController : MonoBehaviour
         //this is the speed for double jump
         if (rigid.velocity.y > 0 && jumpChances == 2 && currentJumpCount == 0)
         {
-            playerAnimator.SetBool("down", false);
+            upperAnimator.SetBool("down", false);
+            lowerAnimator.SetBool("down", false);
             rigid.velocity -= new Vector2(0, jumpSpeedUp_2 * Time.deltaTime);
             //if holding jump button,give a force up to jump higher
             if (holdJump)
@@ -370,14 +381,16 @@ public class CharacterController : MonoBehaviour
         }
         else if (rigid.velocity.y > 0)
         {
-            playerAnimator.SetBool("down", false);
+            upperAnimator.SetBool("down", false);
+            lowerAnimator.SetBool("down", false);
             rigid.velocity -= new Vector2(0, jumpSpeedUp * Time.deltaTime);
             if (holdJump)
                 rigid.velocity += new Vector2(0, speedForHolding * Time.deltaTime);
         }
         else if (rigid.velocity.y < 0)
         {
-            playerAnimator.SetBool("down", true);
+            upperAnimator.SetBool("down", true);
+            lowerAnimator.SetBool("down", true);
             rigid.velocity -= new Vector2(0, jumpSpeedDown * Time.deltaTime);
         }
     }
