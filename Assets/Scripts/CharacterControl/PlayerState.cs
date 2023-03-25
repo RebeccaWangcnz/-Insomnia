@@ -12,6 +12,8 @@ public enum PlayerState
     Hook,
     //the state after big hook, when player flying according to momentum
     AfterBigHook,
+    //can only move
+    PushBox
     //player cannot move or jump when attack
     //Attack
 }

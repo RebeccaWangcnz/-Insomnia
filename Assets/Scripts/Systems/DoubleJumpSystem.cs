@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DoubleJumpSystem : MonoBehaviour
 {
-    public CharacterController player;
+    public PlayerController player;
     
     private void OnEnable()
     {

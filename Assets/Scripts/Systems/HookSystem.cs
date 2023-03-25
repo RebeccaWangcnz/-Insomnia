@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class HookSystem : MonoBehaviour
 {
-    public CharacterController player;
+    public PlayerController player;
     [Header("Big Hook Params")]
     [Tooltip("the speed for player flying to the hook")]
     public float playerFlySpeed;

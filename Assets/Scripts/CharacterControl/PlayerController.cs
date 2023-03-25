@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterController : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     #region Parameters
     [Header("Params for Test")]
@@ -23,11 +23,13 @@ public class CharacterController : MonoBehaviour
     public string hookModeInput;
     [Tooltip("the input for upper input")]
     public string yInput;
+    [Tooltip("the input for interact")]
+    public string interactInput;
     //*********************walk**********************
     [Tooltip("the speed for walking")]
     public float walkSpeed;
     [Tooltip("the max velocityx for stop walking")]
-    public float stopDeadzone;
+    public float walkStopDeadZone;
     [Tooltip("the propertion for player's move afterbighook")]
     public float AfterBigHookSpeed;
     //********************jump*********************
@@ -51,6 +53,10 @@ public class CharacterController : MonoBehaviour
     public float speedForHolding;
     [Tooltip("the speed up for player's second jump by holding jump button")]
     public float speedForHolding_2;
+    [Header("Interation")]
+    //************************interact*******************************
+    [Tooltip("the length of eye detect")]
+    public float eyeRayLength;
 
     //private parameters
     //*******************************rigidbody********************
@@ -59,11 +65,16 @@ public class CharacterController : MonoBehaviour
     public Rigidbody2D rigid;
     //the x velocity for player's rigid
     private float rigidVelocityx;
+    //the actual speed of player
+    private float playerSpeed;
+    private float playerStopDeadZone;
     //*****************************bool for input***********************
     //whether jump is pressed
     private bool jumpPressed;
     //whether attack is pressed
     private bool attackPressed;
+    //whther interact is pressed
+    private bool interactPressed;
     //****************************Ground check****************
     //whether player is on the ground
     private bool isGrounded;
@@ -101,8 +112,22 @@ public class CharacterController : MonoBehaviour
     [HideInInspector]
     public float initialSpeedAfterHook;
     //**********************Animator***********************************
-    private Animator upperAnimator;
-    private Animator lowerAnimator;
+    [HideInInspector]
+    public Animator upperAnimator;
+    [HideInInspector]
+    public Animator lowerAnimator;
+    //******************interact****************************
+    //check if player is holding the box
+    private bool holdBox;
+    //the box that player is pushing
+    private BoxComponent boxBePushed;
+    //*************collision***************************
+    //general layer mask (mask player and confiner)
+    private int layerMask;
+    //**************other******************************
+    //the direction of player
+    private float faceDirection;
+
     #endregion
 
     #region Execute
@@ -120,6 +145,12 @@ public class CharacterController : MonoBehaviour
         var animators = GetComponentsInChildren<Animator>();
         upperAnimator = animators[0];
         lowerAnimator = animators[1];
+        //set layer mask
+        layerMask= ~(1 << 6) & ~(1 << 8);
+        //set speed
+        playerSpeed = walkSpeed;
+        playerStopDeadZone = walkStopDeadZone;
+        faceDirection = Mathf.Sign(rigidVelocityx);
     }
     // Update is called once per frame
     void Update()
@@ -132,20 +163,17 @@ public class CharacterController : MonoBehaviour
         {
             case PlayerState.Normal:
             case PlayerState.AfterBigHook:
+                InteractInput();
                 MoveInput();
                 JumpInput();
                 AttackInput();
                 ChangePlayerFace();
                 break;
-            //case PlayerState.Attack:
-            //    ResetMove();
-            //    ResetJump();
-            //    AttackInput();
-            //    break;
+            case PlayerState.PushBox:
+                MoveInput();
+                InteractInput();
+                break;
             case PlayerState.PrepareHook:
-                //ResetMove();
-                //ResetJump();
-                //ResetAttack();
                 StartHookingInput();
                 Evently.Instance.Publish(new FindingHookEvent(mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, mainCamera.transform.position.z*-1))));
                 break;
@@ -168,6 +196,8 @@ public class CharacterController : MonoBehaviour
         AdjustJump();
         //start hook
         HookExecute();
+        //Interact
+        Interact();
     }
     #endregion
 
@@ -200,7 +230,7 @@ public class CharacterController : MonoBehaviour
     private void MoveInput()
     {
         //get horizontal speed
-        rigidVelocityx = Input.GetAxis(xInput) * walkSpeed;
+        rigidVelocityx = Input.GetAxis(xInput) * playerSpeed;
     }
     private void JumpInput()
     {
@@ -236,11 +266,78 @@ public class CharacterController : MonoBehaviour
     {
         //change the face
         if (rigidVelocityx != 0)
-            transform.localScale = new Vector3(Mathf.Sign(rigidVelocityx), 1, 1);
+            faceDirection = Mathf.Sign(rigidVelocityx);
+        transform.localScale = new Vector3(faceDirection, 1, 1);
+    }
+    private void InteractInput()
+    {
+        if(Input.GetButtonDown(interactInput))
+        {
+            interactPressed = true;
+        }
+        else if(Input.GetButtonUp(interactInput))
+        {
+            interactPressed = false;
+        }
+
     }
 
     //**************************************Execute(FixedUpdate)************************************
-   private void HookExecute()
+   private void Interact()
+   {
+        Debug.DrawRay(transform.position, faceDirection * transform.right * eyeRayLength, Color.yellow);
+        //if just hold the box
+        if (interactPressed&&!holdBox)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, faceDirection * transform.right, eyeRayLength, layerMask);
+            if(hit.collider&&hit.collider.GetComponent<BoxComponent>())
+            {
+                holdBox = true;
+                //chenge state
+                playerState = PlayerState.PushBox;
+                //get the box
+                boxBePushed = hit.collider.GetComponent<BoxComponent>();
+                //make box follow player
+                boxBePushed.transform.SetParent(transform);
+                boxBePushed.GetComponent<Rigidbody2D>().constraints =RigidbodyConstraints2D.FreezeRotation;
+                //set speed
+                playerSpeed = boxBePushed.pushSpeed;
+                playerStopDeadZone = boxBePushed.pushStopDeadZone;
+            }
+        }
+        else if(interactPressed && holdBox)
+        {
+            //animation
+            if (boxBePushed.transform.localScale.x*rigidVelocityx>0)
+            {
+                upperAnimator.SetBool("push", true);
+                upperAnimator.SetBool("pull", false);
+            }
+            else if(boxBePushed.transform.localScale.x *rigidVelocityx < 0)
+            {
+                upperAnimator.SetBool("push", false);
+                upperAnimator.SetBool("pull", true);
+            }
+            boxBePushed.GetComponent<Rigidbody2D>().velocity = rigid.velocity;
+        }
+        //if just unhold the box
+        else if(!interactPressed&&holdBox)
+        {
+            //animation
+            upperAnimator.SetBool("push", false);
+            upperAnimator.SetBool("pull", false);
+            //other settings
+            holdBox = false;
+            playerState = PlayerState.Normal;
+            boxBePushed.transform.SetParent(null);
+            boxBePushed.GetComponent<Rigidbody2D>().constraints |= RigidbodyConstraints2D.FreezePositionX;
+            // boxBePushed.GetComponent<BoxCollider2D>().enabled = true;
+            playerSpeed = walkSpeed;
+            playerStopDeadZone = walkStopDeadZone;
+            boxBePushed = null;
+        }
+   }
+    private void HookExecute()
    {
         if (hookPressed&&hook_test)
         {
@@ -257,12 +354,12 @@ public class CharacterController : MonoBehaviour
     private void Move()
     {
         //when there's no initial speed
-        if(playerState==PlayerState.Normal)
+        if(playerState==PlayerState.Normal|| playerState == PlayerState.PushBox)
         {
             upperAnimator.SetFloat("movespeed", Mathf.Abs(rigidVelocityx * Time.deltaTime));
             lowerAnimator.SetFloat("movespeed", Mathf.Abs(rigidVelocityx * Time.deltaTime));
             //set horizontal speed(in order to stop directly, give it a stopDeadzone)
-            if (Mathf.Abs(rigidVelocityx * Time.deltaTime) > stopDeadzone)
+            if (Mathf.Abs(rigidVelocityx * Time.deltaTime) > playerStopDeadZone)
                 rigid.velocity = new Vector2(rigidVelocityx * Time.deltaTime, rigid.velocity.y);
             else
                 rigid.velocity = new Vector2(0, rigid.velocity.y);
@@ -354,10 +451,9 @@ public class CharacterController : MonoBehaviour
     }
     private bool IsGrounded()
     {
-        int layermask = ~(1 << 6)&~(1<<8);
         Vector3 rayStart_1 = groundPoint.position - new Vector3(rayDistance,0,0);
         Vector3 rayStart_2 = groundPoint.position + new Vector3(rayDistance,0,0);
-        if (Physics2D.Raycast(rayStart_1, -transform.up,rayLength,layermask)|| Physics2D.Raycast(rayStart_2, -transform.up, rayLength,layermask)) 
+        if (Physics2D.Raycast(rayStart_1, -transform.up,rayLength,layerMask)|| Physics2D.Raycast(rayStart_2, -transform.up, rayLength, layerMask)) 
         {
             Debug.DrawRay(rayStart_1, -transform.up*rayLength,Color.yellow);
             Debug.DrawRay(rayStart_2, -transform.up*rayLength,Color.yellow);
@@ -432,4 +528,6 @@ public class CharacterController : MonoBehaviour
         }
     }
     #endregion
+
+
 }

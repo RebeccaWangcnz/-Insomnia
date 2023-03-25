@@ -5,14 +5,14 @@ using UnityEngine;
 public class PlayerAnimationEvent : MonoBehaviour
 {
     private Collider2D weaponCollider;
-    private CharacterController playerController;
+    private PlayerController playerController;
     private void Awake()
     {
         // get weapon collider
         if(GetComponentInChildren<PlayerWeaponComponent>())
         weaponCollider = GetComponentInChildren<PlayerWeaponComponent>().GetComponent<Collider2D>();
         //check if can attack
-        playerController = GetComponent<CharacterController>();
+        playerController = GetComponent<PlayerController>();
     }
     public void EnableWeaponCollider()
     {
