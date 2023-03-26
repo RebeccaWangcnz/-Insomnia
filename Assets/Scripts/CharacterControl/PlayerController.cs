@@ -304,6 +304,13 @@ public class PlayerController : MonoBehaviour
                 playerSpeed = boxBePushed.pushSpeed;
                 playerStopDeadZone = boxBePushed.pushStopDeadZone;
             }
+            //if interactable is a door
+            else if(hit.collider&& hit.collider.GetComponent<DoorTriggerComponent>())
+            {
+                var door = hit.collider.GetComponentInParent<DoorComponent>();
+                Debug.Log("open");
+                door.doorCollider.enabled = false;
+            }
         }
         else if(interactPressed && holdBox)
         {
@@ -317,6 +324,11 @@ public class PlayerController : MonoBehaviour
             {
                 upperAnimator.SetBool("push", false);
                 upperAnimator.SetBool("pull", true);
+            }
+            //forbid that player is not in the state
+            if(playerState!=PlayerState.PushBox)
+            {
+                playerState = PlayerState.PushBox;
             }
             boxBePushed.GetComponent<Rigidbody2D>().velocity = rigid.velocity;
         }
