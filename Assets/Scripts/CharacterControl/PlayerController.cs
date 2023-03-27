@@ -57,6 +57,9 @@ public class PlayerController : MonoBehaviour
     //************************interact*******************************
     [Tooltip("the length of eye detect")]
     public float eyeRayLength;
+    //***********************climb*********************************
+    [Tooltip("climb speed")]
+    public float climbSpeed;
 
     //private parameters
     //*******************************rigidbody********************
@@ -65,6 +68,7 @@ public class PlayerController : MonoBehaviour
     public Rigidbody2D rigid;
     //the x velocity for player's rigid
     private float rigidVelocityx;
+    private float rigidVelocityy;
     //the actual speed of player
     private float playerSpeed;
     private float playerStopDeadZone;
@@ -127,6 +131,7 @@ public class PlayerController : MonoBehaviour
     //**************other******************************
     //the direction of player
     private float faceDirection;
+    //**************climb*******************
 
     #endregion
 
@@ -167,11 +172,17 @@ public class PlayerController : MonoBehaviour
                 MoveInput();
                 JumpInput();
                 AttackInput();
+                ClimbInput();
                 ChangePlayerFace();
                 break;
             case PlayerState.PushBox:
                 MoveInput();
                 InteractInput();
+                break;
+            case PlayerState.ClimbingLadder:
+                MoveInput();
+                ClimbInput();
+                ChangePlayerFace();
                 break;
             case PlayerState.PrepareHook:
                 StartHookingInput();
@@ -198,6 +209,8 @@ public class PlayerController : MonoBehaviour
         HookExecute();
         //Interact
         Interact();
+        //climb
+        ClimbLadder();
     }
     #endregion
 
@@ -231,6 +244,11 @@ public class PlayerController : MonoBehaviour
     {
         //get horizontal speed
         rigidVelocityx = Input.GetAxis(xInput) * playerSpeed;
+    }
+    private void ClimbInput()
+    {
+        //get vertical speed
+        rigidVelocityy = Input.GetAxis(yInput) * climbSpeed;
     }
     private void JumpInput()
     {
@@ -283,13 +301,34 @@ public class PlayerController : MonoBehaviour
     }
 
     //**************************************Execute(FixedUpdate)************************************
-   private void Interact()
+    private void ClimbLadder()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, faceDirection * transform.right, eyeRayLength, layerMask);
+        //bool to check player state
+        bool downToLadder = IsLadder() && rigidVelocityy < 0;
+        bool upToLadder = hit.collider && hit.collider.GetComponent<LadderComponent>() && rigidVelocityy > 0 && isGrounded;
+        bool downToground = rigidVelocityy <= 0 && hit.collider && hit.collider.GetComponent<LadderComponent>();
+        bool upToground = rigidVelocityy >= 0 && (!hit.collider || (hit.collider && !hit.collider.GetComponent<LadderComponent>() && !hit.collider.GetComponent<GroundComponent>()));
+       //start climb
+        if (playerState != PlayerState.ClimbingLadder&& (downToLadder || upToLadder))
+        {
+            playerState = PlayerState.ClimbingLadder;
+            rigid.isKinematic = true;
+        }
+        //stop climb
+        else if (playerState == PlayerState.ClimbingLadder && isGrounded && (downToground || upToground))
+        {
+            playerState = PlayerState.Normal;
+            rigid.isKinematic = false;
+        }
+    }
+    private void Interact()
    {
         Debug.DrawRay(transform.position, faceDirection * transform.right * eyeRayLength, Color.yellow);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, faceDirection * transform.right, eyeRayLength, layerMask);
         //if just hold the box
         if (interactPressed&&!holdBox)
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, faceDirection * transform.right, eyeRayLength, layerMask);
             if(hit.collider&&hit.collider.GetComponent<BoxComponent>())
             {
                 holdBox = true;
@@ -311,6 +350,7 @@ public class PlayerController : MonoBehaviour
                 Debug.Log("open");
                 door.doorCollider.enabled = false;
             }
+
         }
         else if(interactPressed && holdBox)
         {
@@ -383,6 +423,11 @@ public class PlayerController : MonoBehaviour
             //可以模拟很好的阻力，但是前进会很扯
             //rigid.velocity += new Vector2(rigidVelocityx * Time.deltaTime * AfterBigHookSpeed, 0);
         }
+        else if(playerState==PlayerState.ClimbingLadder)
+        {
+            //set animation
+            rigid.velocity = new Vector2(0,rigidVelocityy*Time.deltaTime);
+        }
     }
     private void Jump()
     {
@@ -409,7 +454,7 @@ public class PlayerController : MonoBehaviour
             }
         }
         //when player is in the air but not because of the jump, player's jump chances should minus 1
-        else if(!isGrounded&&!isJump)
+        else if(!isGrounded&&!isJump&&playerState!=PlayerState.ClimbingLadder)
         {
             upperAnimator.SetBool("grounded", false);
             lowerAnimator.SetBool("grounded", false);
@@ -463,12 +508,26 @@ public class PlayerController : MonoBehaviour
     }
     private bool IsGrounded()
     {
-        Vector3 rayStart_1 = groundPoint.position - new Vector3(rayDistance,0,0);
-        Vector3 rayStart_2 = groundPoint.position + new Vector3(rayDistance,0,0);
-        if (Physics2D.Raycast(rayStart_1, -transform.up,rayLength,layerMask)|| Physics2D.Raycast(rayStart_2, -transform.up, rayLength, layerMask)) 
+        RaycastHit2D hit1 = Physics2D.Raycast(groundPoint.position - new Vector3(rayDistance, 0, 0), -transform.up, rayLength, layerMask);
+        RaycastHit2D hit2 = Physics2D.Raycast(groundPoint.position + new Vector3(rayDistance, 0, 0), -transform.up, rayLength, layerMask);
+        if ((hit1.collider&&hit1.collider.GetComponent<GroundComponent>())|| (hit2.collider&&hit2.collider.GetComponent<GroundComponent>()))
         {
-            Debug.DrawRay(rayStart_1, -transform.up*rayLength,Color.yellow);
-            Debug.DrawRay(rayStart_2, -transform.up*rayLength,Color.yellow);
+            Debug.DrawRay(groundPoint.position - new Vector3(rayDistance, 0, 0), -transform.up*rayLength,Color.yellow);
+            Debug.DrawRay(groundPoint.position + new Vector3(rayDistance, 0, 0), -transform.up*rayLength,Color.yellow);
+            return true;
+        }
+        return false;
+
+    }
+    private bool IsLadder()
+    {
+        int _layerMask = 1 << 9;
+        RaycastHit2D hit1 = Physics2D.Raycast(groundPoint.position - new Vector3(rayDistance, 0, 0), -transform.up, rayLength, _layerMask);
+        RaycastHit2D hit2 = Physics2D.Raycast(groundPoint.position + new Vector3(rayDistance, 0, 0), -transform.up, rayLength, _layerMask);
+        if ((hit1.collider && hit1.collider.GetComponent<LadderComponent>()) || (hit2.collider && hit2.collider.GetComponent<LadderComponent>()))
+        {
+            Debug.DrawRay(groundPoint.position - new Vector3(rayDistance, 0, 0), -transform.up * rayLength, Color.yellow);
+            Debug.DrawRay(groundPoint.position + new Vector3(rayDistance, 0, 0), -transform.up * rayLength, Color.yellow);
             return true;
         }
         return false;
@@ -539,6 +598,7 @@ public class PlayerController : MonoBehaviour
             GetComponentInChildren<SpriteRenderer>().color = new Color(150,184,255);
         }
     }
+
     #endregion
 
 
