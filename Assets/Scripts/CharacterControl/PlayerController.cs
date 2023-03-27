@@ -309,16 +309,22 @@ public class PlayerController : MonoBehaviour
         bool upToLadder = hit.collider && hit.collider.GetComponent<LadderComponent>() && rigidVelocityy > 0 && isGrounded;
         bool downToground = rigidVelocityy <= 0 && hit.collider && hit.collider.GetComponent<LadderComponent>();
         bool upToground = rigidVelocityy >= 0 && (!hit.collider || (hit.collider && !hit.collider.GetComponent<LadderComponent>() && !hit.collider.GetComponent<GroundComponent>()));
+        upperAnimator.SetFloat("climbspeed", Mathf.Abs(rigidVelocityy * Time.deltaTime));
+        lowerAnimator.SetFloat("climbspeed", Mathf.Abs(rigidVelocityy * Time.deltaTime));
        //start climb
         if (playerState != PlayerState.ClimbingLadder&& (downToLadder || upToLadder))
         {
             playerState = PlayerState.ClimbingLadder;
+            upperAnimator.SetBool("climb", true);
+            lowerAnimator.SetBool("climb", true);
             rigid.isKinematic = true;
         }
         //stop climb
         else if (playerState == PlayerState.ClimbingLadder && isGrounded && (downToground || upToground))
         {
             playerState = PlayerState.Normal;
+            upperAnimator.SetBool("climb", false);
+            lowerAnimator.SetBool("climb", false);
             rigid.isKinematic = false;
         }
     }
@@ -342,6 +348,8 @@ public class PlayerController : MonoBehaviour
                 //set speed
                 playerSpeed = boxBePushed.pushSpeed;
                 playerStopDeadZone = boxBePushed.pushStopDeadZone;
+                //set animation
+                upperAnimator.SetBool("standpushpull",true);
             }
             //if interactable is a door
             else if(hit.collider&& hit.collider.GetComponent<DoorTriggerComponent>())
@@ -365,6 +373,11 @@ public class PlayerController : MonoBehaviour
                 upperAnimator.SetBool("push", false);
                 upperAnimator.SetBool("pull", true);
             }
+            else 
+            {
+                upperAnimator.SetBool("push", false);
+                upperAnimator.SetBool("pull", false);
+            }
             //forbid that player is not in the state
             if(playerState!=PlayerState.PushBox)
             {
@@ -387,6 +400,8 @@ public class PlayerController : MonoBehaviour
             playerSpeed = walkSpeed;
             playerStopDeadZone = walkStopDeadZone;
             boxBePushed = null;
+            //set animation
+            upperAnimator.SetBool("standpushpull", false);
         }
    }
     private void HookExecute()
