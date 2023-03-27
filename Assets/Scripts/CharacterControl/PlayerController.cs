@@ -160,6 +160,8 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //check grounded
+        isGrounded = IsGrounded();
         //change player's color to show the states
         ChangeColor();
         //change state to hook
@@ -195,8 +197,6 @@ public class PlayerController : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        //check grounded
-        isGrounded= IsGrounded();
         //player move
         Move();
         //jump execute
@@ -357,6 +357,11 @@ public class PlayerController : MonoBehaviour
                 var door = hit.collider.GetComponentInParent<DoorComponent>();
                 Debug.Log("open");
                 door.doorCollider.enabled = false;
+                door.GetComponentInChildren<SpriteRenderer>().color = Color.green;
+            }
+            else if(hit.collider && hit.collider.GetComponent<DoorComponent>())
+            {
+                hit.collider.GetComponentInChildren<SpriteRenderer>().color = Color.red;
             }
 
         }
@@ -455,7 +460,7 @@ public class PlayerController : MonoBehaviour
             //reset currentJumpCount
             currentJumpCount=jumpChances;
             //when player jump down to the ground
-            if (isJump||isAir)
+            if ((isJump||isAir)&& playerState != PlayerState.ClimbingLadder)
             {
                 //set isJump false
                 isJump = false;
@@ -469,7 +474,7 @@ public class PlayerController : MonoBehaviour
             }
         }
         //when player is in the air but not because of the jump, player's jump chances should minus 1
-        else if(!isGrounded&&!isJump&&playerState!=PlayerState.ClimbingLadder)
+        else if(!isGrounded&&!isJump)
         {
             upperAnimator.SetBool("grounded", false);
             lowerAnimator.SetBool("grounded", false);
@@ -523,8 +528,9 @@ public class PlayerController : MonoBehaviour
     }
     private bool IsGrounded()
     {
-        RaycastHit2D hit1 = Physics2D.Raycast(groundPoint.position - new Vector3(rayDistance, 0, 0), -transform.up, rayLength, layerMask);
-        RaycastHit2D hit2 = Physics2D.Raycast(groundPoint.position + new Vector3(rayDistance, 0, 0), -transform.up, rayLength, layerMask);
+        int _layerMask = ~(1 << 6) & ~(1 << 8) & ~(1 << 10);
+        RaycastHit2D hit1 = Physics2D.Raycast(groundPoint.position - new Vector3(rayDistance, 0, 0), -transform.up, rayLength, _layerMask);
+        RaycastHit2D hit2 = Physics2D.Raycast(groundPoint.position + new Vector3(rayDistance, 0, 0), -transform.up, rayLength, _layerMask);
         if ((hit1.collider&&hit1.collider.GetComponent<GroundComponent>())|| (hit2.collider&&hit2.collider.GetComponent<GroundComponent>()))
         {
             Debug.DrawRay(groundPoint.position - new Vector3(rayDistance, 0, 0), -transform.up*rayLength,Color.yellow);
@@ -536,7 +542,7 @@ public class PlayerController : MonoBehaviour
     }
     private bool IsLadder()
     {
-        int _layerMask = 1 << 9;
+        int _layerMask = 1 << 10;
         RaycastHit2D hit1 = Physics2D.Raycast(groundPoint.position - new Vector3(rayDistance, 0, 0), -transform.up, rayLength, _layerMask);
         RaycastHit2D hit2 = Physics2D.Raycast(groundPoint.position + new Vector3(rayDistance, 0, 0), -transform.up, rayLength, _layerMask);
         if ((hit1.collider && hit1.collider.GetComponent<LadderComponent>()) || (hit2.collider && hit2.collider.GetComponent<LadderComponent>()))
