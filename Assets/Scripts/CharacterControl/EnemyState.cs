@@ -5,5 +5,6 @@ using UnityEngine;
 public enum EnemyState
 {
     BeHit,
-    Normal
+    Idle,
+    Chase
 }
