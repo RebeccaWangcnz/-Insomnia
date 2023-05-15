@@ -86,7 +86,8 @@ public class PlayerController : MonoBehaviour
     //combo times
     private int totalAttackTimes = 2;
     //current combo times
-    private int currentAttackTimes;
+    [HideInInspector]
+    public int currentAttackTimes;
     //check if it is the upper attack
     private bool isUpAttack;
     //whether attack is allowed
@@ -94,7 +95,7 @@ public class PlayerController : MonoBehaviour
     public bool allowAttackInput;
     //whether player triggers combo
     [HideInInspector]
-    public bool canTriggerCombo;
+    public bool isTriggerCombo;
     //**************************jump******************************
     [HideInInspector]
     //the number of jump chances for player
@@ -509,14 +510,7 @@ public class PlayerController : MonoBehaviour
             //set player state
             //playerState = PlayerState.Attack;
             //set attack combo
-            if (canTriggerCombo)
-            {
-                currentAttackTimes = (++currentAttackTimes) % totalAttackTimes;
-            }
-            else
-            {
-                currentAttackTimes = 0;
-            }
+            currentAttackTimes = (++currentAttackTimes) % totalAttackTimes;
             //Debug.Log(currentAttackTimes);
             //attack
             Evently.Instance.Publish(new NormalAttackEvent(currentAttackTimes,isUpAttack));
@@ -524,6 +518,10 @@ public class PlayerController : MonoBehaviour
             attackPressed = false;
             //disabled attack input
             allowAttackInput = false;
+        }
+        else
+        {
+            attackPressed = false;
         }
     }
     private bool IsGrounded()

@@ -42,7 +42,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -103,7 +103,238 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: player_upper_upattack2_0
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 125
+        width: 143
+        height: 273
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3bfd452ab0f5ec4438726fb06b0214b1
+      internalID: 1933716373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack2_1
+      rect:
+        serializedVersion: 2
+        x: 751
+        y: 142
+        width: 299
+        height: 306
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3b07d719e42e60c4d84bb0070403660b
+      internalID: -1728590040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack2_2
+      rect:
+        serializedVersion: 2
+        x: 1370
+        y: 142
+        width: 180
+        height: 286
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c6742b9b9e854a5408083b640184d642
+      internalID: 2089553357
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack2_3
+      rect:
+        serializedVersion: 2
+        x: 1970
+        y: 142
+        width: 200
+        height: 263
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8afb0810b0fc7e644a5899c531e887c1
+      internalID: 1443100468
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack2_4
+      rect:
+        serializedVersion: 2
+        x: 2606
+        y: 142
+        width: 289
+        height: 313
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d9214f7e3ee3200498f7886f447a95c1
+      internalID: 116992091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack2_5
+      rect:
+        serializedVersion: 2
+        x: 3282
+        y: 142
+        width: 233
+        height: 283
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6887502704f33a649ba7d1ada33afcc7
+      internalID: 1047466233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack2_6
+      rect:
+        serializedVersion: 2
+        x: 3901
+        y: 142
+        width: 243
+        height: 263
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4ddfc8c5195543045bd9dee01001dd2a
+      internalID: -1510810347
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack2_7
+      rect:
+        serializedVersion: 2
+        x: 4521
+        y: 142
+        width: 233
+        height: 263
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6aabc661c72a9c849805b6e9d1164fe1
+      internalID: -983793510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack2_8
+      rect:
+        serializedVersion: 2
+        x: 5140
+        y: 142
+        width: 160
+        height: 263
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bea9018473b415246a37530bb44bc5cf
+      internalID: -1483805171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack2_9
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 112
+        width: 135
+        height: 293
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9a2cb333e92362f44a20da1e975fb162
+      internalID: 1542954198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack2_10
+      rect:
+        serializedVersion: 2
+        x: 6355
+        y: 122
+        width: 160
+        height: 276
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fa77e086c7ddde24e9710780a8e61273
+      internalID: -679024605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -114,7 +345,18 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      player_upper_upattack2_0: 1933716373
+      player_upper_upattack2_1: -1728590040
+      player_upper_upattack2_10: -679024605
+      player_upper_upattack2_2: 2089553357
+      player_upper_upattack2_3: 1443100468
+      player_upper_upattack2_4: 116992091
+      player_upper_upattack2_5: 1047466233
+      player_upper_upattack2_6: -1510810347
+      player_upper_upattack2_7: -983793510
+      player_upper_upattack2_8: -1483805171
+      player_upper_upattack2_9: 1542954198
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

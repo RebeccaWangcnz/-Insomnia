@@ -15,6 +15,7 @@ public enum PlayerState
     //can only move
     PushBox,
     //player cannot move or jump when attack
-    ClimbingLadder
+    ClimbingLadder,
     //Attack
+    Attack
 }

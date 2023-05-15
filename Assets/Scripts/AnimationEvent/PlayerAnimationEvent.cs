@@ -6,13 +6,15 @@ public class PlayerAnimationEvent : MonoBehaviour
 {
     private Collider2D weaponCollider;
     private PlayerController playerController;
+    private Animator anim;
     private void Awake()
     {
         // get weapon collider
         if(GetComponentInChildren<PlayerWeaponComponent>())
         weaponCollider = GetComponentInChildren<PlayerWeaponComponent>().GetComponent<Collider2D>();
         //check if can attack
-        playerController = GetComponent<PlayerController>();
+        playerController = GetComponentInParent<PlayerController>();
+        anim = GetComponent<Animator>();
     }
     public void EnableWeaponCollider()
     {
@@ -24,7 +26,23 @@ public class PlayerAnimationEvent : MonoBehaviour
         //allow attack
         playerController.allowAttackInput = true;
         //allow trigger combo
-        playerController.canTriggerCombo = true;
+        //playerController.isTriggerCombo = true;
+    }
+    public void CheckCombo()
+    {
+        if(playerController.isTriggerCombo)
+        {
+            if(playerController.currentAttackTimes==1)
+            {
+                anim.SetBool("combo1", true);
+                anim.SetBool("combo2", false);
+            }
+            else
+            {
+                anim.SetBool("combo2", true);
+                anim.SetBool("combo1", false);
+            }
+        }
     }
     public void DisableWeaponCollider()
     {
@@ -34,6 +52,6 @@ public class PlayerAnimationEvent : MonoBehaviour
     public void stopTriggerCombo()
     {
         //player cannot trigger combo anymore
-        playerController.canTriggerCombo = false;
+        //playerController.isTriggerCombo = false;
     }
 }

@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class PhysicsAttackSystem : MonoBehaviour
 {
-    public GameObject player;
-    private Animator playerAnim;
+    public PlayerController player;
+    public Animator playerAnim;
     private void OnEnable()
     {
-        Instantiate();
+        //Instantiate();
         Evently.Instance.Subscribe<NormalAttackEvent>(NormalAttack);
         Evently.Instance.Subscribe<HitEvent>(Hit);
     }
@@ -24,15 +24,25 @@ public class PhysicsAttackSystem : MonoBehaviour
         else
             playerAnim.SetBool("upattack", false);
         //play attack animation according to combos
+
         switch (evt.currentAttackTimes)
         {
-            case 0:
-                playerAnim.SetBool("combo1", true);
-                playerAnim.SetBool("combo2", false);
-                break;
             case 1:
-                playerAnim.SetBool("combo2", true);
-                playerAnim.SetBool("combo1", false);
+                if (player.playerState != PlayerState.Attack)
+                {
+                    player.playerState = PlayerState.Attack;
+                    playerAnim.SetBool("combo1", true);
+                    playerAnim.SetBool("combo2", false);
+                }
+                else
+                {
+                    player.isTriggerCombo = true;
+                }
+                break;
+            case 0:
+                player.isTriggerCombo = true;
+                //playerAnim.SetBool("combo2", true);
+                //playerAnim.SetBool("combo1", false);
                 break;
             default:
                 break;
@@ -52,7 +62,7 @@ public class PhysicsAttackSystem : MonoBehaviour
     #region FUNCTION
     private void Instantiate()
     {
-        playerAnim = player.GetComponent<Animator>();
+        playerAnim = player.GetComponentInParent<Animator>();
     }
     private void FlashRed(SpriteRenderer enemySprite)
     {

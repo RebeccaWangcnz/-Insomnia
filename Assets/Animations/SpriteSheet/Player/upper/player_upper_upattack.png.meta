@@ -42,7 +42,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -103,7 +103,175 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: player_upper_upattack_0
+      rect:
+        serializedVersion: 2
+        x: 171
+        y: 127
+        width: 143
+        height: 272
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 09256b6363d86744f8fff856ccf94a81
+      internalID: -1046749855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack_1
+      rect:
+        serializedVersion: 2
+        x: 752
+        y: 142
+        width: 295
+        height: 306
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6e0930b74de95014daaf526eb97b224e
+      internalID: 1644355592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack_2
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 142
+        width: 177
+        height: 286
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ddd1877897c11bc4cb39c10464bea1d6
+      internalID: -1189479414
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack_3
+      rect:
+        serializedVersion: 2
+        x: 1973
+        y: 142
+        width: 196
+        height: 262
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 303395c9816faed4b9f0ed1e59d6c9b7
+      internalID: -1093417187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack_4
+      rect:
+        serializedVersion: 2
+        x: 2588
+        y: 142
+        width: 201
+        height: 262
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c81563076a37490488e23a89708f55e4
+      internalID: -32735563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack_5
+      rect:
+        serializedVersion: 2
+        x: 3208
+        y: 142
+        width: 201
+        height: 262
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21c97a59610874441849afc0e9ea22ea
+      internalID: 1321813751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack_6
+      rect:
+        serializedVersion: 2
+        x: 3857
+        y: 142
+        width: 172
+        height: 262
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b81cec58405dcc7469c65ecafca4a9ea
+      internalID: 642774026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_upper_upattack_7
+      rect:
+        serializedVersion: 2
+        x: 4519
+        y: 123
+        width: 131
+        height: 276
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1125c379bd7a16b4db2f687e434c759c
+      internalID: 494617187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -114,7 +282,15 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      player_upper_upattack_0: -1046749855
+      player_upper_upattack_1: 1644355592
+      player_upper_upattack_2: -1189479414
+      player_upper_upattack_3: -1093417187
+      player_upper_upattack_4: -32735563
+      player_upper_upattack_5: 1321813751
+      player_upper_upattack_6: 642774026
+      player_upper_upattack_7: 494617187
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
