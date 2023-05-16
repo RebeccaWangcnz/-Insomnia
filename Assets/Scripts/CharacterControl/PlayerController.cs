@@ -152,7 +152,7 @@ public class PlayerController : MonoBehaviour
         upperAnimator = animators[0];
         lowerAnimator = animators[1];
         //set layer mask
-        layerMask= ~(1 << 6) & ~(1 << 8);
+        layerMask = ~(1 << 6) & ~(1 << 8);
         //set speed
         playerSpeed = walkSpeed;
         playerStopDeadZone = walkStopDeadZone;
@@ -189,7 +189,7 @@ public class PlayerController : MonoBehaviour
                 break;
             case PlayerState.PrepareHook:
                 StartHookingInput();
-                Evently.Instance.Publish(new FindingHookEvent(mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, mainCamera.transform.position.z*-1))));
+                Evently.Instance.Publish(new FindingHookEvent(mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, mainCamera.transform.position.z * -1))));
                 break;
             case PlayerState.Hook:
                 StartHookingInput();
@@ -231,9 +231,9 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown(attackInput))
         {
             Evently.Instance.Publish(new ResetHookParamsEvent());
-            hookPressed = true; 
+            hookPressed = true;
             //when hook is available then the game continue
-            if(hook_test)
+            if (hook_test)
                 Time.timeScale = 1.0f;
         }
         else if (Input.GetButtonUp(attackInput))
@@ -280,6 +280,7 @@ public class PlayerController : MonoBehaviour
         }
         else
             isUpAttack = false;
+
     }
     private void ChangePlayerFace()
     {
@@ -290,11 +291,11 @@ public class PlayerController : MonoBehaviour
     }
     private void InteractInput()
     {
-        if(Input.GetButtonDown(interactInput))
+        if (Input.GetButtonDown(interactInput))
         {
             interactPressed = true;
         }
-        else if(Input.GetButtonUp(interactInput))
+        else if (Input.GetButtonUp(interactInput))
         {
             interactPressed = false;
         }
@@ -312,8 +313,8 @@ public class PlayerController : MonoBehaviour
         bool upToground = rigidVelocityy >= 0 && (!hit.collider || (hit.collider && !hit.collider.GetComponent<LadderComponent>() && !hit.collider.GetComponent<GroundComponent>()));
         upperAnimator.SetFloat("climbspeed", Mathf.Abs(rigidVelocityy * Time.deltaTime));
         lowerAnimator.SetFloat("climbspeed", Mathf.Abs(rigidVelocityy * Time.deltaTime));
-       //start climb
-        if (playerState != PlayerState.ClimbingLadder&& (downToLadder || upToLadder))
+        //start climb
+        if (playerState != PlayerState.ClimbingLadder && (downToLadder || upToLadder))
         {
             playerState = PlayerState.ClimbingLadder;
             upperAnimator.SetBool("climb", true);
@@ -330,13 +331,13 @@ public class PlayerController : MonoBehaviour
         }
     }
     private void Interact()
-   {
+    {
         Debug.DrawRay(transform.position, faceDirection * transform.right * eyeRayLength, Color.yellow);
         RaycastHit2D hit = Physics2D.Raycast(transform.position, faceDirection * transform.right, eyeRayLength, layerMask);
         //if just hold the box
-        if (interactPressed&&!holdBox)
+        if (interactPressed && !holdBox)
         {
-            if(hit.collider&&hit.collider.GetComponent<BoxComponent>())
+            if (hit.collider && hit.collider.GetComponent<BoxComponent>())
             {
                 holdBox = true;
                 //chenge state
@@ -345,54 +346,54 @@ public class PlayerController : MonoBehaviour
                 boxBePushed = hit.collider.GetComponent<BoxComponent>();
                 //make box follow player
                 boxBePushed.transform.SetParent(transform);
-                boxBePushed.GetComponent<Rigidbody2D>().constraints =RigidbodyConstraints2D.FreezeRotation;
+                boxBePushed.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
                 //set speed
                 playerSpeed = boxBePushed.pushSpeed;
                 playerStopDeadZone = boxBePushed.pushStopDeadZone;
                 //set animation
-                upperAnimator.SetBool("standpushpull",true);
+                upperAnimator.SetBool("standpushpull", true);
             }
             //if interactable is a door
-            else if(hit.collider&& hit.collider.GetComponent<DoorTriggerComponent>())
+            else if (hit.collider && hit.collider.GetComponent<DoorTriggerComponent>())
             {
                 var door = hit.collider.GetComponentInParent<DoorComponent>();
                 Debug.Log("open");
                 door.doorCollider.enabled = false;
                 door.GetComponentInChildren<SpriteRenderer>().color = Color.green;
             }
-            else if(hit.collider && hit.collider.GetComponent<DoorComponent>())
+            else if (hit.collider && hit.collider.GetComponent<DoorComponent>())
             {
                 hit.collider.GetComponentInChildren<SpriteRenderer>().color = Color.red;
             }
 
         }
-        else if(interactPressed && holdBox)
+        else if (interactPressed && holdBox)
         {
             //animation
-            if (boxBePushed.transform.localScale.x*rigidVelocityx>0)
+            if (boxBePushed.transform.localScale.x * rigidVelocityx > 0)
             {
                 upperAnimator.SetBool("push", true);
                 upperAnimator.SetBool("pull", false);
             }
-            else if(boxBePushed.transform.localScale.x *rigidVelocityx < 0)
+            else if (boxBePushed.transform.localScale.x * rigidVelocityx < 0)
             {
                 upperAnimator.SetBool("push", false);
                 upperAnimator.SetBool("pull", true);
             }
-            else 
+            else
             {
                 upperAnimator.SetBool("push", false);
                 upperAnimator.SetBool("pull", false);
             }
             //forbid that player is not in the state
-            if(playerState!=PlayerState.PushBox)
+            if (playerState != PlayerState.PushBox)
             {
                 playerState = PlayerState.PushBox;
             }
             boxBePushed.GetComponent<Rigidbody2D>().velocity = rigid.velocity;
         }
         //if just unhold the box
-        else if(!interactPressed&&holdBox)
+        else if (!interactPressed && holdBox)
         {
             //animation
             upperAnimator.SetBool("push", false);
@@ -409,17 +410,17 @@ public class PlayerController : MonoBehaviour
             //set animation
             upperAnimator.SetBool("standpushpull", false);
         }
-   }
+    }
     private void HookExecute()
-   {
-        if (hookPressed&&hook_test)
+    {
+        if (hookPressed && hook_test)
         {
             playerState = PlayerState.Hook;
             //execute hook
             Evently.Instance.Publish(new ExecuteHookEvent(hook_test));
         }
         //to check if the player release the mouse0(has entered the hook state)
-        else if (playerState == PlayerState.Hook&&hook_test)
+        else if (playerState == PlayerState.Hook && hook_test)
         {
             Evently.Instance.Publish(new AfterHookEvent(hook_test));
         }
@@ -427,7 +428,7 @@ public class PlayerController : MonoBehaviour
     private void Move()
     {
         //when there's no initial speed
-        if(playerState==PlayerState.Normal|| playerState == PlayerState.PushBox)
+        if (playerState == PlayerState.Normal || playerState == PlayerState.PushBox || playerState == PlayerState.Attack)
         {
             upperAnimator.SetFloat("movespeed", Mathf.Abs(rigidVelocityx * Time.deltaTime));
             lowerAnimator.SetFloat("movespeed", Mathf.Abs(rigidVelocityx * Time.deltaTime));
@@ -437,31 +438,31 @@ public class PlayerController : MonoBehaviour
             else
                 rigid.velocity = new Vector2(0, rigid.velocity.y);
         }
-        else if(playerState==PlayerState.AfterBigHook)
+        else if (playerState == PlayerState.AfterBigHook)
         {
             //后退有无力感，但是前进还不错
-            rigid.velocity =new Vector2(initialSpeedAfterHook+ rigidVelocityx * Time.deltaTime*AfterBigHookSpeed, rigid.velocity.y);
+            rigid.velocity = new Vector2(initialSpeedAfterHook + rigidVelocityx * Time.deltaTime * AfterBigHookSpeed, rigid.velocity.y);
             //可以模拟很好的阻力，但是前进会很扯
             //rigid.velocity += new Vector2(rigidVelocityx * Time.deltaTime * AfterBigHookSpeed, 0);
         }
-        else if(playerState==PlayerState.ClimbingLadder)
+        else if (playerState == PlayerState.ClimbingLadder)
         {
             //set animation
-            rigid.velocity = new Vector2(0,rigidVelocityy*Time.deltaTime);
+            rigid.velocity = new Vector2(0, rigidVelocityy * Time.deltaTime);
         }
     }
     private void Jump()
     {
         //Debug.Log(currentJumpCount);
         //Debug.Log(jumpChances);
-        if(isGrounded)
+        if (isGrounded)
         {
             upperAnimator.SetBool("grounded", true);
             lowerAnimator.SetBool("grounded", true);
             //reset currentJumpCount
-            currentJumpCount=jumpChances;
+            currentJumpCount = jumpChances;
             //when player jump down to the ground
-            if ((isJump||isAir)&& playerState != PlayerState.ClimbingLadder)
+            if ((isJump || isAir) && playerState != PlayerState.ClimbingLadder)
             {
                 //set isJump false
                 isJump = false;
@@ -471,11 +472,11 @@ public class PlayerController : MonoBehaviour
                 //forbid jump input available when you in the air
                 jumpPressed = false;
                 //the player state maybe afterbighook, so we set it to normal
-                playerState=PlayerState.Normal;
+                playerState = PlayerState.Normal;
             }
         }
         //when player is in the air but not because of the jump, player's jump chances should minus 1
-        else if(!isGrounded&&!isJump)
+        else if (!isGrounded && !isJump)
         {
             upperAnimator.SetBool("grounded", false);
             lowerAnimator.SetBool("grounded", false);
@@ -488,10 +489,10 @@ public class PlayerController : MonoBehaviour
             lowerAnimator.SetBool("grounded", false);
         }
         //first jump
-        if (jumpPressed && currentJumpCount>0)
+        if (jumpPressed && currentJumpCount > 0)
         {
             //speed for double jump
-            if(jumpChances == 2 && currentJumpCount == 1)
+            if (jumpChances == 2 && currentJumpCount == 1)
             {
                 rigid.velocity = new Vector2(rigid.velocity.x, jumpSpeed_2 * Time.deltaTime);
             }
@@ -505,7 +506,7 @@ public class PlayerController : MonoBehaviour
     }
     private void Attack()
     {
-        if (attackPressed && allowAttackInput)
+        if (attackPressed && allowAttackInput&& (playerState == PlayerState.Normal || playerState == PlayerState.Attack))
         {
             //set player state
             //playerState = PlayerState.Attack;
@@ -513,7 +514,7 @@ public class PlayerController : MonoBehaviour
             currentAttackTimes = (++currentAttackTimes) % totalAttackTimes;
             //Debug.Log(currentAttackTimes);
             //attack
-            Evently.Instance.Publish(new NormalAttackEvent(currentAttackTimes,isUpAttack));
+            Evently.Instance.Publish(new NormalAttackEvent(currentAttackTimes, isUpAttack));
             //reset attackPressed
             attackPressed = false;
             //disabled attack input
@@ -529,10 +530,10 @@ public class PlayerController : MonoBehaviour
         int _layerMask = ~(1 << 6) & ~(1 << 8) & ~(1 << 10);
         RaycastHit2D hit1 = Physics2D.Raycast(groundPoint.position - new Vector3(rayDistance, 0, 0), -transform.up, rayLength, _layerMask);
         RaycastHit2D hit2 = Physics2D.Raycast(groundPoint.position + new Vector3(rayDistance, 0, 0), -transform.up, rayLength, _layerMask);
-        if ((hit1.collider&&hit1.collider.GetComponent<GroundComponent>())|| (hit2.collider&&hit2.collider.GetComponent<GroundComponent>()))
+        if ((hit1.collider && hit1.collider.GetComponent<GroundComponent>()) || (hit2.collider && hit2.collider.GetComponent<GroundComponent>()))
         {
-            Debug.DrawRay(groundPoint.position - new Vector3(rayDistance, 0, 0), -transform.up*rayLength,Color.yellow);
-            Debug.DrawRay(groundPoint.position + new Vector3(rayDistance, 0, 0), -transform.up*rayLength,Color.yellow);
+            Debug.DrawRay(groundPoint.position - new Vector3(rayDistance, 0, 0), -transform.up * rayLength, Color.yellow);
+            Debug.DrawRay(groundPoint.position + new Vector3(rayDistance, 0, 0), -transform.up * rayLength, Color.yellow);
             return true;
         }
         return false;
@@ -608,13 +609,13 @@ public class PlayerController : MonoBehaviour
     //该方法只用于测试
     private void ChangeColor()
     {
-        if(playerState==PlayerState.PrepareHook)
+        if (playerState == PlayerState.PrepareHook)
         {
             GetComponentInChildren<SpriteRenderer>().color = Color.yellow;
         }
         else
         {
-            GetComponentInChildren<SpriteRenderer>().color = new Color(150,184,255);
+            GetComponentInChildren<SpriteRenderer>().color = new Color(150, 184, 255);
         }
     }
 

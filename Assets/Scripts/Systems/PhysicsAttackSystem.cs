@@ -30,16 +30,20 @@ public class PhysicsAttackSystem : MonoBehaviour
             case 1:
                 if (player.playerState != PlayerState.Attack)
                 {
+                    Debug.Log(evt.currentAttackTimes);
                     player.playerState = PlayerState.Attack;
+                    playerAnim.SetTrigger("isattack");
                     playerAnim.SetBool("combo1", true);
                     playerAnim.SetBool("combo2", false);
                 }
                 else
                 {
+                    Debug.Log("11");
                     player.isTriggerCombo = true;
                 }
                 break;
             case 0:
+                Debug.Log("11");
                 player.isTriggerCombo = true;
                 //playerAnim.SetBool("combo2", true);
                 //playerAnim.SetBool("combo1", false);

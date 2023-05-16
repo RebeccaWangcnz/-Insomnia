@@ -574,7 +574,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &217179460
 Transform:
   m_ObjectHideFlags: 0
@@ -11732,7 +11732,6 @@ GameObject:
   - component: {fileID: 1932086720}
   - component: {fileID: 1932086719}
   - component: {fileID: 1932086718}
-  - component: {fileID: 1932086723}
   - component: {fileID: 1932086724}
   m_Layer: 6
   m_Name: Character
@@ -11837,18 +11836,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1932086723
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1932086717}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 50f4f81f888d22e45badca946e05dfdb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!70 &1932086724
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

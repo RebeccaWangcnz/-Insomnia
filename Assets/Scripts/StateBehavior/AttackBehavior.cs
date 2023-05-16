@@ -19,6 +19,7 @@ public class AttackBehavior : StateMachineBehaviour
         animator.SetBool("combo2", false);
         animator.gameObject.GetComponentInParent<PlayerController>().allowAttackInput = true;
         animator.gameObject.GetComponentInParent<PlayerController>().currentAttackTimes = 0;
+        animator.gameObject.GetComponentInParent<PlayerController>().playerState = PlayerState.Normal;
     }
 
 }

@@ -32,7 +32,7 @@ public class PlayerAnimationEvent : MonoBehaviour
     {
         if(playerController.isTriggerCombo)
         {
-            if(playerController.currentAttackTimes==1)
+            if (playerController.currentAttackTimes==1)
             {
                 anim.SetBool("combo1", true);
                 anim.SetBool("combo2", false);
@@ -42,6 +42,7 @@ public class PlayerAnimationEvent : MonoBehaviour
                 anim.SetBool("combo2", true);
                 anim.SetBool("combo1", false);
             }
+            playerController.isTriggerCombo = false;
         }
     }
     public void DisableWeaponCollider()
